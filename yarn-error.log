@@ -1,0 +1,41 @@
+Arguments: 
+  /usr/local/bin/node /usr/share/yarn/bin/yarn.js init
+
+PATH: 
+  /home/marcocastignoli/.asdf/shims:/home/marcocastignoli/.asdf/bin:/opt/gradle/gradle-5.2.1/bin:/home/marcocastignoli/.cargo/bin:/home/marcocastignoli/.local/bin:/opt/GitHub Desktop:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/cuda/bin:/home/marcocastignoli/Android/Sdk/emulator:/home/marcocastignoli/Android/Sdk/tools:/home/marcocastignoli/Android/Sdk/tools/bin:/home/marcocastignoli/Android/Sdk/platform-tools:/home/marcocastignoli/.cargo/bin:/home/marcocastignoli/.fzf/bin:/home/marcocastignoli/.flutter_skd/bin/:/home/marcocastignoli/.v/
+
+Yarn version: 
+  1.21.1
+
+Node version: 
+  15.0.1
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: canceled
+      at Interface.<anonymous> (/usr/share/yarn/lib/cli.js:136925:13)
+      at Interface.emit (node:events:327:20)
+      at Interface._ttyWrite (node:readline:875:16)
+      at ReadStream.onkeypress (node:readline:213:10)
+      at ReadStream.emit (node:events:327:20)
+      at emitKeys (node:internal/readline/utils:345:14)
+      at emitKeys.next (<anonymous>)
+      at ReadStream.onData (node:readline:1144:36)
+      at ReadStream.emit (node:events:327:20)
+      at addChunk (node:internal/streams/readable:304:12)
+
+npm manifest: 
+  {
+    "name": "boardgame",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
