@@ -6,6 +6,7 @@ import Spell from './Spell.js'
 import Character from './Character.js'
 import Game from './Game.js'
 
+import map from '../maps/test.js'
 // mods
 const _1d3_spellPower = new Mod()
 _1d3_spellPower.spellPower = () => roll([...dices(1, 2)])
@@ -116,7 +117,7 @@ const baseMods = new Mod()
 baseMods.actions = () => 3
 baseMods.hp = () => 10
 baseMods.hit = () => roll([...dices(1, 6)])
-baseMods.speed = () => roll([...dices(1, 6)])
+baseMods.speed = () => 10
 baseMods.label = "Base stats"
 
 const Rheon = new Character(
@@ -127,7 +128,7 @@ const Rheon = new Character(
     t0_bow,
     t0_cloth,
     [],
-    [0, 1]
+    [4, 8]
 )
 
 const Theon = new Character(
@@ -138,16 +139,22 @@ const Theon = new Character(
     null,
     t0_cloth,
     [t0_fire_armor, t0_fireball],
-    [0, 0]
+    [3, 7]
 )
 
 const game = new Game([
     Theon,
     Rheon
-],0, 0)
+],0, 0, null, map)
 game.setActivePlayer(Theon)
-game.activePlayerCastSpell("t0_fire_armor", Theon)
+//game.activePlayerMove([1, 2])
+
+
 game.activePlayerCastSpell("t0_fireball", Rheon)
+
+
+/*
+game.activePlayerCastSpell("t0_fire_armor", Theon)
 game.activePlayerCastSpell("t0_fireball", Rheon)
 game.setActivePlayer(Rheon)
 game.activePlayerAttackMelee(Theon)
@@ -158,4 +165,4 @@ game.setActivePlayer(Rheon)
 game.activePlayerAttackMelee(Theon)
 game.activePlayerAttackMelee(Theon)
 game.activePlayerAttackMelee(Theon)
-game.nextTurn()
+game.nextTurn() */

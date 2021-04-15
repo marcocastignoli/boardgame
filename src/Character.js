@@ -84,14 +84,18 @@ class Character {
     }
     move(coords, turn) {
         const speed = this.getAttr("speed", turn, true)
+        let arrivingCell = this.cell.slice(0)
         coords.forEach((c, i) => {
-            if (Math.abs(c) <= speed) {
-                this.cell[i] += c
-            } else {
-                throw "Cannot move faster then player's maximum speed"
-            }
+            arrivingCell[i] += c
         })
-        return true
+        let sumDistance = this.cell.reduce((tot, coordinate, i) => Math.pow(coordinate - arrivingCell[i], 2))
+        console.log(Math.sqrt(sumDistance))
+        if (Math.floor(Math.sqrt(sumDistance)) <= speed) {
+            this.cell = arrivingCell
+            return true
+        } else {
+            throw "Cannot move faster then maximum speed"
+        }
     }
 }
 

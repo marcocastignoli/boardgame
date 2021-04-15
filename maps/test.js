@@ -1,0 +1,73 @@
+export default { "compressionlevel":-1,
+"editorsettings":
+   {
+    "export":
+       {
+        "format":"js",
+        "target":"test.js.js"
+       }
+   },
+"height":10,
+"infinite":false,
+"layers":[
+       {
+        "data":[30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        "height":10,
+        "id":1,
+        "name":"sand",
+        "opacity":1,
+        "properties":[
+               {
+                "name":"collision",
+                "type":"bool",
+                "value":false
+               }],
+        "type":"tilelayer",
+        "visible":true,
+        "width":10,
+        "x":0,
+        "y":0
+       }, 
+       {
+        "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "height":10,
+        "id":2,
+        "name":"wall",
+        "opacity":1,
+        "properties":[
+               {
+                "name":"collision",
+                "type":"bool",
+                "value":true
+               }],
+        "type":"tilelayer",
+        "visible":true,
+        "width":10,
+        "x":0,
+        "y":0
+       }],
+"nextlayerid":3,
+"nextobjectid":1,
+"orientation":"orthogonal",
+"renderorder":"right-down",
+"tiledversion":"1.5.0",
+"tileheight":32,
+"tilesets":[
+       {
+        "columns":8,
+        "firstgid":1,
+        "image":"tmw_desert_spacing.png",
+        "imageheight":199,
+        "imagewidth":265,
+        "margin":1,
+        "name":"tmw_desert_spacing",
+        "spacing":1,
+        "tilecount":48,
+        "tileheight":32,
+        "tilewidth":32
+       }],
+"tilewidth":32,
+"type":"map",
+"version":1.5,
+"width":10
+}

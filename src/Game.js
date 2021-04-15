@@ -1,11 +1,12 @@
-const MAX_RANGED = 1
+const MAX_RANGED = 10
 
 class Game {
-    constructor(players, turn, actionsActivePlayer, activePlayer) {
+    constructor(players, turn, actionsActivePlayer, activePlayer, map) {
         this.players = players
         this.turn = turn
         this.actionsActivePlayer = actionsActivePlayer
         this.activePlayer = activePlayer
+        this.map = map
         console.log("Game starts")
     }
     nextTurn() {
@@ -47,9 +48,32 @@ class Game {
         return true
     }
     checkDistance(defender) {
+        const coords = [0,0]
+        defender.cell.forEach((c,i) => {
+            coords[i] = c - this.activePlayer.cell[i]
+        })
+        const wall = this.map.layers.find(l => l.name === "wall")
+        let x = 0
+        let y = 0
+        let val
+        for(let i = 0; i<Math.max.apply(null, coords); i++) {
+            val = wall.data[(this.activePlayer.cell[0] + x) + (this.activePlayer.cell[1] + y) * wall.height]
+            if (val != 0) {
+                throw `${this.activePlayer.label} cannot hit ${defender.label} throught walls.`
+            }
+            if (x < coords[0]) {
+                x++
+            }
+            if (y < coords[1]) {
+                y++
+            }
+        }
+
         let attackerCell = this.activePlayer.cell
-        let sumDistance = defender.cell.reduce((tot, coordinate, i) => Math.pow(coordinate + attackerCell[i], 2))
+        let sumDistance = defender.cell.reduce((tot, coordinate, i) => Math.pow(coordinate - attackerCell[i], 2))
         return Math.sqrt(sumDistance)
+
+        
     }
     activePlayerAttackMelee(defender) {
         if (!this.checkTarget(defender)) {
@@ -168,8 +192,25 @@ class Game {
             return false
         }
         this.addActionsActivePlayer()
+        const wall = this.map.layers.find(l => l.name === "wall")
+        let x = 0
+        let y = 0
+        let val
+        for(let i = 0; i<Math.max.apply(null, coords); i++) {
+            val = wall.data[(this.activePlayer.cell[0] + x) + (this.activePlayer.cell[1] + y) * wall.height]
+            if (val != 0) {
+                throw "Player cannot move throught walls"
+            }
+            if (x < coords[0]) {
+                x++
+            }
+            if (y < coords[1]) {
+                y++
+            }
+        }
         console.log(`${this.activePlayer.label} moves ${coords.join(", ")}`)
         this.activePlayer.move(coords, this.turn)
+        console.log(`${this.activePlayer.label} is now in ${this.activePlayer.cell.join(", ")}`)
     }
 }
 
