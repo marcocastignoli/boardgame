@@ -59,8 +59,8 @@ class Game {
         console.log(`${this.activePlayer.label} tries to hit ${defender.label}.`)
         const attacker = this.activePlayer
         const hitAttacker = attacker.getAttr("hit", this.turn)
-        const dodgeDefender = defender.getAttr("dodge", this.turn, true)
-        const parryDefender = defender.getAttr("parry", this.turn, true)
+        const dodgeDefender = defender.getAttr("dodge", this.turn)
+        const parryDefender = defender.getAttr("parry", this.turn)
         const defendAttr = dodgeDefender > parryDefender ? dodgeDefender : parryDefender
         if (hitAttacker <= defendAttr) {
             console.log(`${attacker.label} melee misses ${defender.label} rolling hit ${hitAttacker} against ${dodgeDefender > parryDefender ? 'dodge' : 'parry'} ${defendAttr}`)
@@ -124,7 +124,7 @@ class Game {
         const caster = this.activePlayer
 
         if (!spell.friendly) {
-            console.log(`${this.activePlayer.label} tries to hit ${target.label}.`)
+            console.log(`${this.activePlayer.label} tries to cast ${spell.label} on ${target.label}.`)
             const hitAttacker = caster.getAttr("hit", this.turn)
             const dodgeDefender = target.getAttr("dodge", this.turn)
             const parryDefender = target.getAttr("parry", this.turn)
@@ -133,10 +133,14 @@ class Game {
                 console.log(`${caster.label} spell misses ${target.label} rolling hit ${hitAttacker} against ${dodgeDefender > parryDefender ? 'dodge' : 'parry'} ${defendAttr}`)
                 return false
             }
+            
             console.log(`${caster.label} spell hit ${target.label} rolling hit ${hitAttacker} against ${dodgeDefender > parryDefender ? 'dodge' : 'parry'} ${defendAttr}`)
-
-            const damageAmount = spell.damage() + caster.getAttr("spellPower", this.turn)
-            const hpDefender = target.processSpell(spell.mods, spell.duration, damageAmount, this.turn)
+            const spellDamage = spell.damage()
+            console.log(`\tDamage from spell ${spell.label}: ${spellDamage}\t${spell.damage.toString()}`)
+            const damageAmount = spellDamage + caster.getAttr("spellPower", this.turn)
+            console.log(`\tTotal: ${damageAmount}`)
+            console.log(`The spell afflicts ${target.label} with: `)
+            const hpDefender = target.processSpell(spell, damageAmount, this.turn)
             console.log(`${caster.label} does ${damageAmount} spell damage to ${target.label}.`)
             if (hpDefender <= 0) {
                 console.log(`${target.label} is dead.`)
@@ -145,7 +149,8 @@ class Game {
             }
             return true
         } else {
-            target.processSpell(spell.mods, spell.duration, spell.damage(), this.turn)
+            console.log(`${this.activePlayer.label} casts ${spell.label} on ${target.label}.`)
+            target.processSpell(spell, spell.damage(), this.turn)
         }
     }
     activePlayerMove(coords) {

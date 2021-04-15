@@ -42,16 +42,22 @@ class Character {
         this.mods.push(damage)
         return this.getAttr("hp", turn, true)
     }
-    processSpell(mods, duration, damageAmount, turn) {
-        const damage = new Mod({
-            hp: () => -damageAmount
-        }, turn, `Damage at turn ${turn}`)
-        this.mods.push(damage)
+    processSpell(spell, damageAmount, turn) {
+        const mods = spell.mods
+        const duration = spell.duration
+        const label = spell.duration
+        if (damageAmount > 0) {
+            const damage = new Mod({
+                hp: () => -damageAmount
+            }, turn, `Damage at turn ${turn}`)
+            this.mods.push(damage)
+        }
         mods.forEach(mod => {
+            console.log(`\t${mod.label}`)
             mod.startsAt = turn
             mod.expiresAt = turn + duration
-            const damage = new Mod(mod, turn, `Damage at turn ${turn}`)
-            this.mods.push(damage)
+            const modSpell = new Mod(mod, turn, `Spell at turn ${turn}`)
+            this.mods.push(modSpell)
         })
         return this.getAttr("hp", turn, true)
     }

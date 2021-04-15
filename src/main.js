@@ -8,7 +8,7 @@ import Game from './Game.js'
 
 // mods
 const _1d3_spellPower = new Mod()
-_1d3_spellPower.spellPower = () => roll([...dices(1, 3)])
+_1d3_spellPower.spellPower = () => roll([...dices(1, 2)])
 _1d3_spellPower.label = "Light enchantment of spell power"
 
 const _2_mana = new Mod()
@@ -83,7 +83,7 @@ const t0_bow = new Weapon({
 
 const _5_parry = new Mod()
 _5_parry.parry = () => 5
-_5_parry.label = "Fire armor"
+_5_parry.label = "+5 on parry for 1 turn"
 
 
 const t0_fire_armor = new Spell(
@@ -98,14 +98,14 @@ const t0_fire_armor = new Spell(
 
 const _minus_1_hit = new Mod()
 _minus_1_hit.hit = () => -1
-_minus_1_hit.label = "Fireball's burns"
+_minus_1_hit.label = "-1 hit for one turn"
 
 const t0_fireball = new Spell(
     "t0_fireball",
     "Fireball",
     [_minus_1_hit],
     false,
-    () => roll([...dices(1, 6)]),
+    () => roll([...dices(1, 3)]),
     1,
     5
 )

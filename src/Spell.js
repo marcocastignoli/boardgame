@@ -4,7 +4,7 @@ class Spell {
         this.label = label
         this.mods = mods
         this.friendly = friendly
-        this.damage = () => 0
+        this.damage = damage || (() => 0)
         this.duration = duration
         this.mana = mana
     }
