@@ -1,3 +1,4 @@
+```
 Game starts
 Active player is Theon
 Theon tries to hit Rheon.
@@ -53,3 +54,4 @@ Rheon melee hit Theon rolling hit 6 against parry 0
 Rheon does 12 melee damage to Theon.
 Theon is dead.
 Rheon cannot target Theon because Theon is dead
+```
