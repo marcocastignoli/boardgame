@@ -37,10 +37,12 @@ _20_mana.mana = () => 20
 
 const _15_mana = new Mod()
 _15_mana.mana = () => 15
+_15_mana.label = "Enchantment of mana"
 
-const _5_endturnMana = new Mod()
-_5_endturnMana.endturnMana = () => 5
-_5_endturnMana.label = "Recover mana"
+const _5_endTurnMana = new Mod()
+_5_endTurnMana.maxMana = () => 15
+_5_endTurnMana.endTurnMana = () => 5
+_5_endTurnMana.label = "Recover mana"
 
 // gems
 const t0_spell_power = new Gem(
@@ -53,7 +55,7 @@ const t0_spell_power = new Gem(
 const t0_cloth = new Armor({
     key: "t0_cloth",
     label: "Robe of the mage",
-    mods: [_5_endturnMana],
+    mods: [_5_endTurnMana],
     gemSlots: [GEM_TYPES.BLUE],
     gems: [t0_spell_power]
 })
@@ -107,7 +109,7 @@ const t0_fireball = new Spell(
     false,
     () => roll([...dices(1, 3)]),
     1,
-    5
+    6
 )
 
 const baseMods = new Mod()
@@ -139,7 +141,10 @@ const Theon = new Character(
     [0, 0]
 )
 
-const game = new Game(0, 0)
+const game = new Game([
+    Theon,
+    Rheon
+],0, 0)
 game.setActivePlayer(Theon)
 game.activePlayerCastSpell("t0_fire_armor", Theon)
 game.activePlayerCastSpell("t0_fireball", Rheon)

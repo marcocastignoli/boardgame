@@ -1,13 +1,17 @@
 const MAX_RANGED = 1
 
 class Game {
-    constructor(turn, actionsActivePlayer, activePlayer) {
+    constructor(players, turn, actionsActivePlayer, activePlayer) {
+        this.players = players
         this.turn = turn
         this.actionsActivePlayer = actionsActivePlayer
         this.activePlayer = activePlayer
         console.log("Game starts")
     }
     nextTurn() {
+        this.players.forEach(player => {
+            player.checkEndTurnMods(this.turn)
+        })
         this.turn++
         this.actionsActivePlayer = 0
         this.activePlayer = null
@@ -120,11 +124,16 @@ class Game {
             console.log(`${this.activePlayer.label} cannot cast ${spellKey}.`)
             return false
         }
+        const manaInitial = this.activePlayer.getAttr("mana", this.turn, true)
+        if (manaInitial < spell.mana) {
+            console.log(`${this.activePlayer.label} cannot cast ${spell.label} because mana is not enought.`)
+            return false
+        }
         this.addActionsActivePlayer()
         const caster = this.activePlayer
-
+        console.log(`${this.activePlayer.label} cast ${spell.label} on ${target.label} using ${spell.mana} mana.`)
+        const manaLeft = caster.useMana(spell.mana, this.turn)
         if (!spell.friendly) {
-            console.log(`${this.activePlayer.label} tries to cast ${spell.label} on ${target.label}.`)
             const hitAttacker = caster.getAttr("hit", this.turn)
             const dodgeDefender = target.getAttr("dodge", this.turn)
             const parryDefender = target.getAttr("parry", this.turn)
@@ -147,11 +156,12 @@ class Game {
             } else {
                 console.log(`${target.label} has now ${hpDefender} hp.`)
             }
-            return true
         } else {
-            console.log(`${this.activePlayer.label} casts ${spell.label} on ${target.label}.`)
             target.processSpell(spell, spell.damage(), this.turn)
         }
+
+        console.log(`${this.activePlayer.label} now has ${manaLeft} mana left.`)
+        return true
     }
     activePlayerMove(coords) {
         if (!this.checkActivePlayerAlive()) {

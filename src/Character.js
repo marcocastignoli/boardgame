@@ -35,6 +35,27 @@ class Character {
         silence || console.log(`\t\tTotal: ${attribute}`)
         return attribute
     }
+    checkEndTurnMods(turn) {
+        const endTurnMana = this.getAttr("endTurnMana", turn, true)
+        const mana = this.getAttr("mana", turn, true)
+        const maxMana = this.getAttr("maxMana", turn, true)
+        let manaIncrease = 0
+        if (endTurnMana + mana > maxMana) {
+            manaIncrease = maxMana - mana
+        } else {
+            manaIncrease = endTurnMana
+        }
+        console.log(`${this.label} recovered ${manaIncrease} mana.`)
+        const endTurnManaMod = new Mod(manaIncrease, turn, `Recovered mana of turn ${turn}`)
+        this.mods.push(endTurnManaMod)
+    }
+    useMana(amount, turn) {
+        const damage = new Mod({
+            mana: () => -amount
+        }, turn, `Spell at turn ${turn}`)
+        this.mods.push(damage)
+        return this.getAttr("mana", turn, true)
+    }
     damage(amount, turn) {
         const damage = new Mod({
             hp: () => -amount
