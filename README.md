@@ -25,6 +25,37 @@ Every character or mob has the following attributes:
 * **endTurnMana**: the amount of mana restored every end turn
 * **speed**: the maximum speed of the player
 
+### Calculating attributes
+
+A character doesn't have fixed attributes, attributes are calculated each time, applying all the modifiers of the character and all the modifier of every piece of its gear.
+
+#### Modifiers
+
+Modifiers can be permanent or temporary, so it should be considered in the calculation. In the following example you can see how I will write modifiers in this document.
+
+E.g.
+Rheon has the following modifiers:
+* **0 parry [0 -> ∞]** from his base stats. [0 -> ∞] is the duration of the modifier (from turn 0 to the end).
+* **+5 parry [0 -> 1]** from the spell he cast at turn 0, that last for one turn
+* **-1d3 parry [0 -> 1]** from the spell his enemy cast on him. (1d3 means one "three faces" dice)
+
+Here is how to calculate Rheon's parry at turn 0
+```
+0 + 5 - 1d3 = 0 + 5 - 2 = 3
+```
+
+### Map
+
+The maps in this implementation are created using the open source map editor *Tiled*.
+
+![alt text](./docs/imgs/tiled.png)
+
+The map is a grid of X * Y cells.
+
+There are currently two kinds of blocks: normal and walls. The player cannot move through walls.
+
+The player can move in every directions without cutting the edges of the walls and respecting her maxium speed.
+
 ### Turn
 
 The turn has the following phases: 
@@ -43,40 +74,28 @@ The available actions are:
 * ~~Search~~ **//TODO**
 * ~~Activate an item~~ **//TODO**
 
-### Map
-
-The maps in this implementation are created using the open source map editor *Tiled*.
-
-![alt text](./docs/imgs/tiled.png)
-
-There are currently two kind of blocks: normal and walls. The player cannot move through walls.
-
-The player can move in every directions without cutting the edges of the walls and respecting her maxium speed.
-
-### Calculating attributes
-
-A character doesn't have fixed attributes, attributes are calculated each time, applying all the modifiers of the character and all the modifier of every piece of its gear.
-
-Modifiers can be permanent or temporary, so it should be considered in the calculation
-
-E.g.
-Rheon has the following modifiers:
-* **0 parry [0 -> ∞]** from his base stats. [0 -> ∞] is the duration of the modifier (from turn 0 to the end).
-* **+5 parry [0 -> 1]** from the spell he cast at turn 0, that last for one turn
-* **-1d3 parry [0 -> 1]** from the spell his enemy cast on him. (1d3 means one "three faces" dice)
-
-Here is how to calculate Rheon's parry at turn 0
-```
-0 + 5 - 1d3 = 0 + 5 - 2 = 3
-```
-
 ### Attacking
+
+If the attack is melee, the attacker and the defender must be in the same cell.
+
+If the attack is range or spell, the attacker and the defender must be in line of sight (see next section for more info) and the distance must be less then the maximum range distance.
 
 A player hits the target if her hit roll is higher then the parry or the dodge of the target.
 
+If the defender is hit, then the damage is calculated and inserted as an hp modifier [ x -> ∞ ] (where x is the turn), to the defender modifiers.
+
+#### Calculating range and melee damage
+
+A player always attack with all the equipped weapons. For example if Rheon range attack Agaroth, the damage is calculated summing all the rangeDamage modifiers (from his modifiers and the modifiers from his gear).
+
+#### Calculating  spell damage
+
+A player that cast a spell to attack has to select which spell to cast. Each spell has a specific damage modifier.
+The total damage is the sum of the spell damage modier and all the spellPower modifiers (from his modifiers and the modifiers from his gear).
+
 ### Line of sight
 
-One of the main differences between the board game and this implementation is the calculation of the line of sight. In the board game version the players use a ruler to check if there are any obstancles between the two entities. In this implementation I use a "weird" way to check it, follow [this link](./docs/LOS.md) to discover more.
+One of the main differences between the board game and this implementation is the calculation of the line of sight. In the board game version the players use a ruler to check if there are any obstancles between the two entities. In this implementation I use a custom algorithm to check it, follow [this link](./docs/LOS.md) to discover more.
 
 ```
 Game starts
