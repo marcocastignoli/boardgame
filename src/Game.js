@@ -1,3 +1,5 @@
+import Los from './Los.js'
+
 const MAX_RANGED = 10
 
 class Game {
@@ -48,32 +50,15 @@ class Game {
         return true
     }
     checkDistance(defender) {
-        const coords = [0,0]
-        defender.cell.forEach((c,i) => {
-            coords[i] = c - this.activePlayer.cell[i]
-        })
         const wall = this.map.layers.find(l => l.name === "wall")
-        let x = 0
-        let y = 0
-        let val
-        for(let i = 0; i<Math.max.apply(null, coords); i++) {
-            val = wall.data[(this.activePlayer.cell[0] + x) + (this.activePlayer.cell[1] + y) * wall.height]
-            if (val != 0) {
-                throw `${this.activePlayer.label} cannot hit ${defender.label} throught walls.`
-            }
-            if (x < coords[0]) {
-                x++
-            }
-            if (y < coords[1]) {
-                y++
-            }
+
+        if(!Los(wall.data, wall.height, this.activePlayer.cell, defender.cell)) {
+            throw `${this.activePlayer.label} cannot hit ${defender.label} throught walls.`
         }
 
         let attackerCell = this.activePlayer.cell
         let sumDistance = defender.cell.reduce((tot, coordinate, i) => Math.pow(coordinate - attackerCell[i], 2))
         return Math.sqrt(sumDistance)
-
-        
     }
     activePlayerAttackMelee(defender) {
         if (!this.checkTarget(defender)) {
@@ -193,20 +178,8 @@ class Game {
         }
         this.addActionsActivePlayer()
         const wall = this.map.layers.find(l => l.name === "wall")
-        let x = 0
-        let y = 0
-        let val
-        for(let i = 0; i<Math.max.apply(null, coords); i++) {
-            val = wall.data[(this.activePlayer.cell[0] + x) + (this.activePlayer.cell[1] + y) * wall.height]
-            if (val != 0) {
-                throw "Player cannot move throught walls"
-            }
-            if (x < coords[0]) {
-                x++
-            }
-            if (y < coords[1]) {
-                y++
-            }
+        if(!Los(wall.data, wall.height, this.activePlayer.cell, coords)) {
+            throw "Player cannot move throught walls"
         }
         console.log(`${this.activePlayer.label} moves ${coords.join(", ")}`)
         this.activePlayer.move(coords, this.turn)

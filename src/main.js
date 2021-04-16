@@ -120,6 +120,17 @@ baseMods.hit = () => roll([...dices(1, 6)])
 baseMods.speed = () => 10
 baseMods.label = "Base stats"
 
+const Theon = new Character(
+    "theon",
+    "Theon",
+    [baseMods],
+    t0_mage_sword,
+    null,
+    t0_cloth,
+    [t0_fire_armor, t0_fireball],
+    [0, 5]
+)
+
 const Rheon = new Character(
     "rheon",
     "Rheon",
@@ -129,17 +140,6 @@ const Rheon = new Character(
     t0_cloth,
     [],
     [4, 8]
-)
-
-const Theon = new Character(
-    "theon",
-    "Theon",
-    [baseMods],
-    t0_mage_sword,
-    null,
-    t0_cloth,
-    [t0_fire_armor, t0_fireball],
-    [3, 7]
 )
 
 const game = new Game([
