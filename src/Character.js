@@ -89,7 +89,6 @@ class Character {
             arrivingCell[i] += c
         })
         let sumDistance = this.cell.reduce((tot, coordinate, i) => Math.pow(coordinate - arrivingCell[i], 2))
-        console.log(Math.sqrt(sumDistance))
         if (Math.floor(Math.sqrt(sumDistance)) <= speed) {
             this.cell = arrivingCell
             return true

@@ -28,9 +28,7 @@ function Los(arrayWall, columns, point1, point2) {
     });
 
     const pathWall = finder.findPath(point1[0], point1[1], point2[0], point2[1], gridWall);
-    console.log(pathWall)
     const pathClean = finder.findPath(point1[0], point1[1], point2[0], point2[1], gridClean);
-    console.log(pathClean)
     return pathClean.length === pathWall.length
 }
 

@@ -128,7 +128,7 @@ const Theon = new Character(
     null,
     t0_cloth,
     [t0_fire_armor, t0_fireball],
-    [0, 5]
+    [3, 7]
 )
 
 const Rheon = new Character(
@@ -150,14 +150,15 @@ game.setActivePlayer(Theon)
 //game.activePlayerMove([1, 2])
 
 
-game.activePlayerCastSpell("t0_fireball", Rheon)
+//game.activePlayerCastSpell("t0_fireball", Rheon)
 
 
-/*
+
 game.activePlayerCastSpell("t0_fire_armor", Theon)
 game.activePlayerCastSpell("t0_fireball", Rheon)
 game.setActivePlayer(Rheon)
 game.activePlayerAttackMelee(Theon)
+game.activePlayerMove([-1, 0])
 game.activePlayerMove([0, -1])
 game.activePlayerAttackMelee(Theon)
 game.nextTurn()
@@ -165,4 +166,4 @@ game.setActivePlayer(Rheon)
 game.activePlayerAttackMelee(Theon)
 game.activePlayerAttackMelee(Theon)
 game.activePlayerAttackMelee(Theon)
-game.nextTurn() */
+game.nextTurn()

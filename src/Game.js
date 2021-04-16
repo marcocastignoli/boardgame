@@ -49,13 +49,16 @@ class Game {
         }
         return true
     }
-    checkDistance(defender) {
+    checkWalls(defender) {
         const wall = this.map.layers.find(l => l.name === "wall")
 
         if(!Los(wall.data, wall.height, this.activePlayer.cell, defender.cell)) {
-            throw `${this.activePlayer.label} cannot hit ${defender.label} throught walls.`
+            return false
         }
-
+        return true
+    }
+    checkDistance(defender) {
+        
         let attackerCell = this.activePlayer.cell
         let sumDistance = defender.cell.reduce((tot, coordinate, i) => Math.pow(coordinate - attackerCell[i], 2))
         return Math.sqrt(sumDistance)
@@ -63,6 +66,10 @@ class Game {
     activePlayerAttackMelee(defender) {
         if (!this.checkTarget(defender)) {
             return false
+        }
+        if (!this.checkWalls(defender)) {
+            console.log(`${this.activePlayer.label} cannot hit ${defender.label} throught walls.`)
+            return false;
         }
         if (this.checkDistance(defender) !== 0) {
             console.log(`${this.activePlayer.label} cannot attack because ${defender.label} is too far away`)
@@ -94,6 +101,10 @@ class Game {
         if (!this.checkTarget(defender)) {
             return false
         }
+        if (!this.checkWalls(target)) {
+            console.log(`${this.activePlayer.label} cannot hit ${target.label} throught walls.`)
+            return false;
+        }
         if (this.checkDistance(defender) > MAX_RANGED) {
             console.log(`${this.activePlayer.label} cannot attack because ${defender.label} is too far away`)
             return false
@@ -123,6 +134,10 @@ class Game {
     activePlayerCastSpell(spellKey, target) {
         if (!this.checkTarget(target)) {
             return false
+        }
+        if (!this.checkWalls(target)) {
+            console.log(`${this.activePlayer.label} cannot hit ${target.label} throught walls.`)
+            return false;
         }
         if (this.checkDistance(target) > MAX_RANGED) {
             console.log(`${this.activePlayer.label} cannot cast a spell to ${target.label} because is too far away.`)
@@ -176,11 +191,16 @@ class Game {
         if (!this.checkActivePlayerAlive()) {
             return false
         }
-        this.addActionsActivePlayer()
+        let arrivingCell = this.activePlayer.cell.slice(0)
+        coords.forEach((c, i) => {
+            arrivingCell[i] += c
+        })
         const wall = this.map.layers.find(l => l.name === "wall")
-        if(!Los(wall.data, wall.height, this.activePlayer.cell, coords)) {
-            throw "Player cannot move throught walls"
+        if(!Los(wall.data, wall.height, this.activePlayer.cell, arrivingCell)) {
+            console.log("Player cannot move throught walls")
+            return false;
         }
+        this.addActionsActivePlayer()
         console.log(`${this.activePlayer.label} moves ${coords.join(", ")}`)
         this.activePlayer.move(coords, this.turn)
         console.log(`${this.activePlayer.label} is now in ${this.activePlayer.cell.join(", ")}`)
