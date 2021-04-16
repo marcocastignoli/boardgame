@@ -25,23 +25,32 @@ Every character or mob has the following attributes:
 * **endTurnMana**: the amount of mana restored every end turn
 * **speed**: the maximum speed of the player
 
-### Calculating attributes
+### Modifiers
 
-A character doesn't have fixed attributes, attributes are calculated each time, applying all the modifiers of the character and all the modifier of every piece of its gear.
-
-#### Modifiers
+Modifiers are composed by:
+* Attributes to modify (can be numbers or dice roll)
+* startsAt: turn in which start to be effective
+* expiresAt: turn in which stop to be effective, can be ∞
 
 Modifiers can be permanent or temporary, so it should be considered in the calculation. In the following example you can see how I will write modifiers in this document.
 
 E.g.
 Rheon has the following modifiers:
-* **0 parry [0 -> ∞]** from his base stats. [0 -> ∞] is the duration of the modifier (from turn 0 to the end).
-* **+5 parry [0 -> 1]** from the spell he cast at turn 0, that last for one turn
+* **0 parry [0 -> ∞]** from his base stats. [0 -> ∞] is the duration of the modifier (from turn 0 to the end)
+* **+5 parry [1 -> 2]** from the spell he cast at turn 0, that starts from turn 1 and last for one turn
 * **-1d3 parry [0 -> 1]** from the spell his enemy cast on him. (1d3 means one "three faces" dice)
 
-Here is how to calculate Rheon's parry at turn 0
+### Calculating attributes
+
+A character doesn't have fixed attributes, attributes are calculated each time, applying:
+* all the modifiers of the character
+* all the modifier of every piece of its gear.
+
+that are active in the turn.
+
+Here is how to calculate Rheon's parry at turn 0 (from previous example)
 ```
-0 + 5 - 1d3 = 0 + 5 - 2 = 3
+0 - 1d3 = 0 - 2 = -2
 ```
 
 ### Map
@@ -97,60 +106,64 @@ The total damage is the sum of the spell damage modier and all the spellPower mo
 
 One of the main differences between the board game and this implementation is the calculation of the line of sight. In the board game version the players use a ruler to check if there are any obstancles between the two entities. In this implementation I use a custom algorithm to check it, follow [this link](./docs/LOS.md) to discover more.
 
+## Game example: LOG
+
 ```
 Game starts
 Active player is Theon
-Theon tries to hit Rheon.
-        Calculation for Theon's hit
-                Base stats: 4   () => roll([...dices(1, 6)])
-                Total: 4
-        Calculation for Rheon's dodge
-                Total: 0
-        Calculation for Rheon's parry
-                Total: 0
-Theon spell hit Rheon rolling hit 4 against parry 0
-        Calculation for Theon's spellPower
-                Light enchantment of spell power: 2     () => roll([...dices(1, 3)])
-                Light enchantment of spell power: 3     () => roll([...dices(1, 3)])
-                Total: 5
-Theon does 5 spell damage to Rheon.
-Rheon has now 5 hp.
-Theon tries to hit Rheon.
-        Calculation for Theon's hit
-                Base stats: 6   () => roll([...dices(1, 6)])
-                Total: 6
-        Calculation for Rheon's dodge
-                Total: 0
-        Calculation for Rheon's parry
-                Total: 0
-Theon spell hit Rheon rolling hit 6 against parry 0
-        Calculation for Theon's spellPower
-                Light enchantment of spell power: 1     () => roll([...dices(1, 3)])
-                Light enchantment of spell power: 1     () => roll([...dices(1, 3)])
-                Total: 2
-Theon does 2 spell damage to Rheon.
-Rheon has now 3 hp.
+Theon cast Fire Armor on Theon using 5 mana.
+        +5 on parry for 1 turn
+Theon now has 10 mana left.
+Theon cannot hit Rheon throught walls.
 Active player is Rheon
-Rheon cannot attack because Theon is too far away
+Rheon cannot hit Theon throught walls.
+Rheon moves -1, 0
+Rheon is now in 3, 8
 Rheon moves 0, -1
+Rheon is now in 3, 7
 Rheon tries to hit Theon.
         Calculation for Rheon's hit
-                Base stats: 6   () => roll([...dices(1, 6)])
-                Fireball's burns: -1    () => -1
-                Fireball's burns: -1    () => -1
+                Base stats: 4   () => roll([...dices(1, 6)])
                 Total: 4
+        Calculation for Theon's dodge
+                Total: 0
+        Calculation for Theon's parry
+                +5 on parry for 1 turn: 5       () => 5
+                Total: 5
 Rheon melee misses Theon rolling hit 4 against parry 5
+Theon recovered 5 mana.
+Rheon recovered 0 mana.
 Next turn
 Active player is Rheon
 Rheon tries to hit Theon.
         Calculation for Rheon's hit
-                Base stats: 6   () => roll([...dices(1, 6)])
-                Total: 6
-Rheon melee hit Theon rolling hit 6 against parry 0
+                Base stats: 5   () => roll([...dices(1, 6)])
+                Total: 5
+        Calculation for Theon's dodge
+                Total: 0
+        Calculation for Theon's parry
+                Total: 0
+Rheon melee hit Theon rolling hit 5 against parry 0
         Calculation for Rheon's meleeDamage
-                Sword strike: 12        () => roll([...dices(3, 6)])
-                Total: 12
-Rheon does 12 melee damage to Theon.
+                Sword strike: 6 () => roll([...dices(3, 6)])
+                Total: 6
+Rheon does 6 melee damage to Theon.
+Theon has now 4 hp.
+Rheon tries to hit Theon.
+        Calculation for Rheon's hit
+                Base stats: 5   () => roll([...dices(1, 6)])
+                Total: 5
+        Calculation for Theon's dodge
+                Total: 0
+        Calculation for Theon's parry
+                Total: 0
+Rheon melee hit Theon rolling hit 5 against parry 0
+        Calculation for Rheon's meleeDamage
+                Sword strike: 14        () => roll([...dices(3, 6)])
+                Total: 14
+Rheon does 14 melee damage to Theon.
 Theon is dead.
 Rheon cannot target Theon because Theon is dead
+Theon recovered 5 mana.
+Rheon recovered 0 mana.
 ```
