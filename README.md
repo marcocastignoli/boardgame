@@ -7,6 +7,20 @@ Chronicles of Proxima is set five thousands years after the beginning of the dar
 
 Chronicles of Proxima was initially thought as a board game, this implementation has some differences from the orgiginal idea. Still, the gameplay is very similar. Right now the project is a work in progress, I just finished working on the basic dynamics of the gameplay. And I'm starting to work on the backend to allow multiplayer games. Then I'll work on the frontend.
 
+## Installing and running the example
+
+```
+npm install
+```
+or
+```
+yarn
+```
+then
+```
+node src/main.js
+```
+
 ## Game mechanics
 
 ### Base attributes
