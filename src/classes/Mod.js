@@ -1,6 +1,7 @@
 class Mod {
-    constructor(mods = {}, turn = 0, label = "Undefined mod") {
+    constructor(mods = {}, turn = 0, key = "undefined", label = "Undefined mod") {
         this.label = label
+        this.key = key
 
         this.expiresAt = Infinity
         this.startsAt = 0

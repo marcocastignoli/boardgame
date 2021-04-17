@@ -1,16 +1,17 @@
-import { dices, roll } from './Dice.js'
-import Mod from './Mod.js'
-import Gem, { GEM_TYPES } from './Gem.js'
-import { Weapon, Armor } from './Items.js'
-import Spell from './Spell.js'
-import Character from './Character.js'
-import Game from './Game.js'
+import { dices, roll } from './classes/Dice.js'
+import Mod from './classes/Mod.js'
+import Gem, { GEM_TYPES } from './classes/Gem.js'
+import { Weapon, Armor } from './classes/Items.js'
+import Spell from './classes/Spell.js'
+import Character from './classes/Character.js'
+import Game from './classes/Game.js'
 
 import map from '../maps/test.js'
 // mods
 const _1d3_spellPower = new Mod()
 _1d3_spellPower.spellPower = () => roll([...dices(1, 2)])
 _1d3_spellPower.label = "Light enchantment of spell power"
+_1d3_spellPower.key = "1d3_spellPower"
 
 const _2_mana = new Mod()
 _2_mana.mana = () => 2

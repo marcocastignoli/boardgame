@@ -46,20 +46,20 @@ class Character {
             manaIncrease = endTurnMana
         }
         console.log(`${this.label} recovered ${manaIncrease} mana.`)
-        const endTurnManaMod = new Mod(manaIncrease, turn, `Recovered mana of turn ${turn}`)
+        const endTurnManaMod = new Mod(manaIncrease, turn, `manaEndTurn_${this.key}_${turn}`, `Recovered mana of turn ${turn}`)
         this.mods.push(endTurnManaMod)
     }
     useMana(amount, turn) {
         const damage = new Mod({
             mana: () => -amount
-        }, turn, `Spell at turn ${turn}`)
+        }, turn, `mana_${this.key}_${turn}`, `Mana at turn ${turn}`)
         this.mods.push(damage)
         return this.getAttr("mana", turn, true)
     }
     damage(amount, turn) {
         const damage = new Mod({
             hp: () => -amount
-        }, turn, `Damage at turn ${turn}`)
+        }, turn, `damage_${this.key}_${turn}`, `Damage at turn ${turn}`)
         this.mods.push(damage)
         return this.getAttr("hp", turn, true)
     }
@@ -70,14 +70,14 @@ class Character {
         if (damageAmount > 0) {
             const damage = new Mod({
                 hp: () => -damageAmount
-            }, turn, `Damage at turn ${turn}`)
+            }, turn, `damage_${this.key}_${turn}`, `Damage at turn ${turn}`)
             this.mods.push(damage)
         }
         mods.forEach(mod => {
             console.log(`\t${mod.label}`)
             mod.startsAt = turn
             mod.expiresAt = turn + duration
-            const modSpell = new Mod(mod, turn, `Spell at turn ${turn}`)
+            const modSpell = new Mod(mod, turn, `spell_${this.key}_${turn}`, `Spell at turn ${turn}`)
             this.mods.push(modSpell)
         })
         return this.getAttr("hp", turn, true)
