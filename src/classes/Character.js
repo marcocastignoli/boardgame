@@ -1,7 +1,7 @@
 import Mod from './Mod.js'
 
 class Character {
-    constructor(key, label, mods, weap1, weap2, armor, spells = [], cell = [0, 0]) {
+    constructor(key, label, mods = [], weap1, weap2, armor, spells = [], cell = [0, 0]) {
         this.key = key
         this.label = label
         this.mods = mods
@@ -10,6 +10,21 @@ class Character {
         this.armor = armor
         this.spells = spells
         this.cell = cell
+    }
+    dbTable() {
+        return "characters"
+    }
+    toDb() {
+        return {
+            key: this.key,
+            label: this.label,
+            mods: this.mods.map(x => x.key),
+            weap1: this.weap1 && this.weap1.key,
+            weap2: this.weap2 && this.weap2.key,
+            armor: this.armor && this.armor.key,
+            spells: this.spells.map(x => x.key),
+            cell: this.cell,
+        }
     }
     getAttr(attr, turn, silence = false) {
         silence || console.log(`\tCalculation for ${this.label}'s ${attr}`)

@@ -6,8 +6,8 @@ import Spell from './classes/Spell.js'
 import Character from './classes/Character.js'
 import Game from './classes/Game.js'
 
-import modifiers from './modifiers.js'
-import spellDamages from './spellDamages.js'
+import modifiers from './var/modifiers.js'
+import spellDamages from './var/damages.js'
 import map from '../maps/test.js'
 
 // gems
@@ -15,13 +15,13 @@ const t0_spell_power = new Gem(
     "t0_spell_power",
     "Gem of the mage",
     GEM_TYPES.BLUE,
-    [modifiers._1d3_spellPower]
+    [modifiers.find(mod => mod.key === "_1d3_spellPower")]
 )
 
 const t0_cloth = new Armor({
     key: "t0_cloth",
     label: "Robe of the mage",
-    mods: [modifiers._5_endTurnMana],
+    mods: [modifiers.find(mod => mod.key === "_5_endTurnMana")],
     gemSlots: [GEM_TYPES.BLUE],
     gems: [t0_spell_power]
 })
@@ -29,7 +29,7 @@ const t0_cloth = new Armor({
 const t0_mage_sword = new Weapon({
     key: "t0_mage_sword",
     label: "Sword of the mage",
-    mods: [modifiers._15_mana, modifiers.sword_mage_damage],
+    mods: [modifiers.find(mod => mod.key === "_15_mana"), modifiers.find(mod => mod.key === "sword_mage_damage")],
     gemSlots: [GEM_TYPES.BLUE],
     gems: [t0_spell_power]
 })
@@ -37,7 +37,7 @@ const t0_mage_sword = new Weapon({
 const t0_bow = new Weapon({
     key: "t0_bow",
     label: "Bow",
-    mods: [modifiers.bow_damage],
+    mods: [modifiers.find(mod => mod.key === "bow_damage")],
     gemSlots: [],
     gems: []
 })
@@ -45,7 +45,7 @@ const t0_bow = new Weapon({
 const t0_fire_armor = new Spell(
     "t0_fire_armor",
     "Fire Armor",
-    [modifiers._5_parry],
+    [modifiers.find(mod => mod.key === "_5_parry")],
     true,
     0,
     1,
@@ -55,7 +55,7 @@ const t0_fire_armor = new Spell(
 const t0_fireball = new Spell(
     "t0_fireball",
     "Fireball",
-    [modifiers._minus_1_hit],
+    [modifiers.find(mod => mod.key === "_minus_1_hit")],
     false,
     spellDamages.t0_fireball_damage,
     1,
@@ -65,7 +65,7 @@ const t0_fireball = new Spell(
 const Theon = new Character(
     "theon",
     "Theon",
-    [modifiers.baseMods],
+    [modifiers.find(mod => mod.key === "baseMods")],
     t0_mage_sword,
     null,
     t0_cloth,
@@ -76,7 +76,7 @@ const Theon = new Character(
 const Rheon = new Character(
     "rheon",
     "Rheon",
-    [modifiers.baseMods],
+    [modifiers.find(mod => mod.key === "baseMods")],
     t0_mage_sword,
     t0_bow,
     t0_cloth,

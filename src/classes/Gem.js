@@ -13,6 +13,17 @@ class Gem {
         this.color = color
         this.mods = mods
     }
+    dbTable() {
+        return "gems"
+    }
+    toDb() {
+        return {
+            key: this.key,
+            label: this.label,
+            color: this.color,
+            mods: this.mods.map(x => x.key),
+        }
+    }
 }
 
 export default Gem

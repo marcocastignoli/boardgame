@@ -5,8 +5,8 @@ const { MongoClient } = mongodb
 import Gem, { GEM_TYPES } from './classes/Gem.js'
 import { Armor, Weapon } from './classes/Items.js'
 import Spell from './classes/Spell.js'
-import { getMods } from './modifiers.js'
-import { getSpellDamage } from './spellDamages.js'
+import { getMods } from './var/modifiers.js'
+import { getDamage } from './var/damages.js'
 
 class Db {
     async init(connection) {
@@ -26,6 +26,12 @@ class Db {
             result.color,
             getMods(result.mods)
         )
+    }
+    async saveGem(gem) {
+        const query = { key: gem.key };
+        const update = { $set: gem.toDb() };
+        const options = { upsert: true };
+        return await this.db.collection("gems").updateOne(query, update, options);
     }
     async gems(gems) {
         let res = []
@@ -77,7 +83,7 @@ class Db {
             result.label,
             getMods(result.mods),
             result.friendly,
-            getSpellDamage(result.damage),
+            getDamage(result.damage),
             result.duration, 
             result.mana
         )
@@ -104,6 +110,12 @@ class Db {
             await this.spells(result.spells),
             result.cell
         )
+    }
+    async save(object) {
+        const query = { key: object.key };
+        const update = { $set: object.toDb() };
+        const options = { upsert: true };
+        return await this.db.collection(object.dbTable()).updateOne(query, update, options);
     }
 }
 

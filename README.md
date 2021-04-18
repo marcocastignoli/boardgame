@@ -16,9 +16,9 @@ or
 ```
 yarn
 ```
-then
+then to run test program
 ```
-node src/main.js
+node src/test.js
 ```
 
 ## Game mechanics

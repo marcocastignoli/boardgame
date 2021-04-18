@@ -7,6 +7,15 @@ class Item {
         this.gemSlots = gemSlots
         this.gems = gems
     }
+    toDb() {
+        return {
+            key: this.key,
+            label: this.label,
+            mods: this.mods.map(x => x.key),
+            gemSlots: this.gemSlots,
+            gems: this.gems.map(x => x.key),
+        }
+    }
     getAttr(attr, turn, silence) {
         let attribute = 0
         this.mods.forEach(mod => {
@@ -37,11 +46,17 @@ class Weapon extends Item {
     constructor({ key, label, mods, gemSlots, gems }) {
         super(key, label, mods, gemSlots, gems)
     }
+    dbTable() {
+        return "weapons"
+    }
 }
 
 class Armor extends Item {
     constructor({ key, label, mods, gemSlots, gems }) {
         super(key, label, mods, gemSlots, gems)
+    }
+    dbTable() {
+        return "armors"
     }
 }
 

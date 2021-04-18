@@ -8,6 +8,20 @@ class Spell {
         this.duration = duration
         this.mana = mana
     }
+    dbTable() {
+        return "spells"
+    }
+    toDb() {
+        return {
+            key: this.key,
+            label: this.label,
+            mods: this.mods.map(x => x.key),
+            friendly: this.friendly,
+            damage: this.damage.map(x => x.key),
+            duration: this.duration,
+            mana: this.mana,
+        }
+    }
     getAttr(attr, turn) {
         let attribute = 0
         this.mods.forEach(mod => {
