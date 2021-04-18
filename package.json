@@ -5,6 +5,7 @@
   "license": "MIT",
   "type": "module",
   "dependencies": {
+    "mongodb": "^3.6.6",
     "pathfinding": "^0.4.18"
   }
 }
