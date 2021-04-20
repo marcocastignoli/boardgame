@@ -1,7 +1,7 @@
 import Mod from './Mod.js'
 
 class Character {
-    constructor(key, label, mods = [], weap1, weap2, armor, spells = [], cell = [0, 0]) {
+    constructor(key, label, mods = [], weap1, weap2, armor, spells = [], cell = [0, 0], turns = 0) {
         this.key = key
         this.label = label
         this.mods = mods
@@ -10,6 +10,7 @@ class Character {
         this.armor = armor
         this.spells = spells
         this.cell = cell
+        this.turns = turns
     }
     dbTable() {
         return "characters"
@@ -26,7 +27,7 @@ class Character {
             cell: this.cell,
         }
     }
-    getAttr(attr, turn, silence = false) {
+    getAttr(attr, silence = false, turn = this.turns) {
         silence || console.log(`\tCalculation for ${this.label}'s ${attr}`)
         let attribute = 0
         this.mods.forEach(mod => {
@@ -50,10 +51,10 @@ class Character {
         silence || console.log(`\t\tTotal: ${attribute}`)
         return attribute
     }
-    checkEndTurnMods(turn) {
-        const endTurnMana = this.getAttr("endTurnMana", turn, true)
-        const mana = this.getAttr("mana", turn, true)
-        const maxMana = this.getAttr("maxMana", turn, true)
+    checkEndTurnMods(turn = this.turns) {
+        const endTurnMana = this.getAttr("endTurnMana", true, turn)
+        const mana = this.getAttr("mana", true, turn)
+        const maxMana = this.getAttr("maxMana", true, turn)
         let manaIncrease = 0
         if (endTurnMana + mana > maxMana) {
             manaIncrease = maxMana - mana
@@ -64,21 +65,21 @@ class Character {
         const endTurnManaMod = new Mod(manaIncrease, turn, `manaEndTurn_${this.key}_${turn}`, `Recovered mana of turn ${turn}`)
         this.mods.push(endTurnManaMod)
     }
-    useMana(amount, turn) {
+    useMana(amount, turn = this.turns) {
         const damage = new Mod({
             mana: () => -amount
         }, turn, `mana_${this.key}_${turn}`, `Mana at turn ${turn}`)
         this.mods.push(damage)
         return this.getAttr("mana", turn, true)
     }
-    damage(amount, turn) {
+    damage(amount, turn = this.turns) {
         const damage = new Mod({
             hp: () => -amount
         }, turn, `damage_${this.key}_${turn}`, `Damage at turn ${turn}`)
         this.mods.push(damage)
-        return this.getAttr("hp", turn, true)
+        return this.getAttr("hp", true)
     }
-    processSpell(spell, damageAmount, turn) {
+    processSpell(spell, damageAmount, turn = this.turns) {
         const mods = spell.mods
         const duration = spell.duration
         const label = spell.duration
@@ -98,7 +99,7 @@ class Character {
         return this.getAttr("hp", turn, true)
     }
     move(coords, turn) {
-        const speed = this.getAttr("speed", turn, true)
+        const speed = this.getAttr("speed", true)
         let arrivingCell = this.cell.slice(0)
         coords.forEach((c, i) => {
             arrivingCell[i] += c

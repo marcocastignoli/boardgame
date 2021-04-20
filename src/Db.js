@@ -108,7 +108,8 @@ class Db {
             await this.weapon(result.weap2),
             await this.armor(result.armor),
             await this.spells(result.spells),
-            result.cell
+            result.cell,
+            result.turns
         )
     }
     async save(object) {

@@ -13,7 +13,8 @@ class Game {
     }
     nextTurn() {
         this.players.forEach(player => {
-            player.checkEndTurnMods(this.turn)
+            player.checkEndTurnMods()
+            player.turns++
         })
         this.turn++
         this.actionsActivePlayer = 0
@@ -26,14 +27,14 @@ class Game {
         this.activePlayer = player
     }
     addActionsActivePlayer() {
-        if (this.actionsActivePlayer < this.activePlayer.getAttr('actions', this.turn, true)) {
+        if (this.actionsActivePlayer < this.activePlayer.getAttr('actions', true)) {
             this.actionsActivePlayer++
         } else {
             throw 'Change player'
         }
     }
     checkActivePlayerAlive() {
-        if (this.activePlayer.getAttr("hp", this.turn, true) <= 0) {
+        if (this.activePlayer.getAttr("hp", true) <= 0) {
             console.log(`${this.activePlayer.label} is dead`)
             return false
         }
@@ -43,7 +44,7 @@ class Game {
         if (!this.checkActivePlayerAlive()) {
             return false
         }
-        if (defender.getAttr("hp", this.turn, true) <= 0) {
+        if (defender.getAttr("hp", true) <= 0) {
             console.log(`${this.activePlayer.label} cannot target ${defender.label} because ${defender.label} is dead`)
             return false
         }
@@ -78,18 +79,18 @@ class Game {
         this.addActionsActivePlayer()
         console.log(`${this.activePlayer.label} tries to hit ${defender.label}.`)
         const attacker = this.activePlayer
-        const hitAttacker = attacker.getAttr("hit", this.turn)
-        const dodgeDefender = defender.getAttr("dodge", this.turn)
-        const parryDefender = defender.getAttr("parry", this.turn)
+        const hitAttacker = attacker.getAttr("hit")
+        const dodgeDefender = defender.getAttr("dodge")
+        const parryDefender = defender.getAttr("parry")
         const defendAttr = dodgeDefender > parryDefender ? dodgeDefender : parryDefender
         if (hitAttacker <= defendAttr) {
             console.log(`${attacker.label} melee misses ${defender.label} rolling hit ${hitAttacker} against ${dodgeDefender > parryDefender ? 'dodge' : 'parry'} ${defendAttr}`)
             return false
         }
         console.log(`${attacker.label} melee hit ${defender.label} rolling hit ${hitAttacker} against ${dodgeDefender > parryDefender ? 'dodge' : 'parry'} ${defendAttr}`)
-        const damageAmount = attacker.getAttr("meleeDamage", this.turn)
+        const damageAmount = attacker.getAttr("meleeDamage")
         console.log(`${attacker.label} does ${damageAmount} melee damage to ${defender.label}.`)
-        const hpDefender = defender.damage(damageAmount, this.turn)
+        const hpDefender = defender.damage(damageAmount)
         if (hpDefender <= 0) {
             console.log(`${defender.label} is dead.`)
         } else {
@@ -112,18 +113,18 @@ class Game {
         this.addActionsActivePlayer()
         console.log(`${this.activePlayer.label} tries to hit ${defender.label}.`)
         const attacker = this.activePlayer
-        const hitAttacker = attacker.getAttr("hit", this.turn)
-        const dodgeDefender = defender.getAttr("dodge", this.turn)
-        const parryDefender = defender.getAttr("parry", this.turn)
+        const hitAttacker = attacker.getAttr("hit")
+        const dodgeDefender = defender.getAttr("dodge")
+        const parryDefender = defender.getAttr("parry")
         const defendAttr = dodgeDefender > parryDefender ? dodgeDefender : parryDefender
         if (hitAttacker <= defendAttr) {
             console.log(`${attacker.label} range misses ${defender.label} rolling hit ${hitAttacker} against ${dodgeDefender > parryDefender ? 'dodge' : 'parry'} ${defendAttr}`)
             return false
         }
         console.log(`${attacker.label} range hit ${defender.label} rolling hit ${hitAttacker} against ${dodgeDefender > parryDefender ? 'dodge' : 'parry'} ${defendAttr}`)
-        const damageAmount = attacker.getAttr("rangeDamage", this.turn)
+        const damageAmount = attacker.getAttr("rangeDamage")
         console.log(`${attacker.label} does ${damageAmount} range damage to ${defender.label}.`)
-        const hpDefender = defender.damage(damageAmount, this.turn)
+        const hpDefender = defender.damage(damageAmount)
         if (hpDefender <= 0) {
             console.log(`${defender.label} is dead.`)
         } else {
@@ -148,7 +149,7 @@ class Game {
             console.log(`${this.activePlayer.label} cannot cast ${spellKey}.`)
             return false
         }
-        const manaInitial = this.activePlayer.getAttr("mana", this.turn, true)
+        const manaInitial = this.activePlayer.getAttr("mana", true)
         if (manaInitial < spell.mana) {
             console.log(`${this.activePlayer.label} cannot cast ${spell.label} because mana is not enought.`)
             return false
@@ -156,11 +157,11 @@ class Game {
         this.addActionsActivePlayer()
         const caster = this.activePlayer
         console.log(`${this.activePlayer.label} cast ${spell.label} on ${target.label} using ${spell.mana} mana.`)
-        const manaLeft = caster.useMana(spell.mana, this.turn)
+        const manaLeft = caster.useMana(spell.mana)
         if (!spell.friendly) {
-            const hitAttacker = caster.getAttr("hit", this.turn)
-            const dodgeDefender = target.getAttr("dodge", this.turn)
-            const parryDefender = target.getAttr("parry", this.turn)
+            const hitAttacker = caster.getAttr("hit")
+            const dodgeDefender = target.getAttr("dodge")
+            const parryDefender = target.getAttr("parry")
             const defendAttr = dodgeDefender > parryDefender ? dodgeDefender : parryDefender
             if (hitAttacker <= defendAttr) {
                 console.log(`${caster.label} spell misses ${target.label} rolling hit ${hitAttacker} against ${dodgeDefender > parryDefender ? 'dodge' : 'parry'} ${defendAttr}`)
@@ -170,10 +171,10 @@ class Game {
             console.log(`${caster.label} spell hit ${target.label} rolling hit ${hitAttacker} against ${dodgeDefender > parryDefender ? 'dodge' : 'parry'} ${defendAttr}`)
             const spellDamage = spell.damage()
             console.log(`\tDamage from spell ${spell.label}: ${spellDamage}\t${spell.damage.toString()}`)
-            const damageAmount = spellDamage + caster.getAttr("spellPower", this.turn)
+            const damageAmount = spellDamage + caster.getAttr("spellPower")
             console.log(`\tTotal: ${damageAmount}`)
             console.log(`The spell afflicts ${target.label} with: `)
-            const hpDefender = target.processSpell(spell, damageAmount, this.turn)
+            const hpDefender = target.processSpell(spell, damageAmount)
             console.log(`${caster.label} does ${damageAmount} spell damage to ${target.label}.`)
             if (hpDefender <= 0) {
                 console.log(`${target.label} is dead.`)
@@ -181,7 +182,7 @@ class Game {
                 console.log(`${target.label} has now ${hpDefender} hp.`)
             }
         } else {
-            target.processSpell(spell, spell.damage(), this.turn)
+            target.processSpell(spell, spell.damage())
         }
 
         console.log(`${this.activePlayer.label} now has ${manaLeft} mana left.`)
@@ -202,7 +203,7 @@ class Game {
         }
         this.addActionsActivePlayer()
         console.log(`${this.activePlayer.label} moves ${coords.join(", ")}`)
-        this.activePlayer.move(coords, this.turn)
+        this.activePlayer.move(coords)
         console.log(`${this.activePlayer.label} is now in ${this.activePlayer.cell.join(", ")}`)
     }
 }
