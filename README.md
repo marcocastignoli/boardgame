@@ -127,6 +127,9 @@ Game starts
 Active player is Theon
 Theon cast Fire Armor on Theon using 5 mana.
         +5 on parry for 1 turn
+        Calculation for Theon's hp
+                Base stats: 10  () => 10
+                Total: 10
 Theon now has 10 mana left.
 Theon cannot hit Rheon throught walls.
 Active player is Rheon
@@ -137,14 +140,14 @@ Rheon moves 0, -1
 Rheon is now in 3, 7
 Rheon tries to hit Theon.
         Calculation for Rheon's hit
-                Base stats: 4   () => roll([...dices(1, 6)])
-                Total: 4
+                Base stats: 3   () => roll([...dices(1, 6)])
+                Total: 3
         Calculation for Theon's dodge
                 Total: 0
         Calculation for Theon's parry
                 +5 on parry for 1 turn: 5       () => 5
                 Total: 5
-Rheon melee misses Theon rolling hit 4 against parry 5
+Rheon melee misses Theon rolling hit 3 against parry 5
 Theon recovered 5 mana.
 Rheon recovered 0 mana.
 Next turn
@@ -159,25 +162,12 @@ Rheon tries to hit Theon.
                 Total: 0
 Rheon melee hit Theon rolling hit 5 against parry 0
         Calculation for Rheon's meleeDamage
-                Sword strike: 6 () => roll([...dices(3, 6)])
-                Total: 6
-Rheon does 6 melee damage to Theon.
-Theon has now 4 hp.
-Rheon tries to hit Theon.
-        Calculation for Rheon's hit
-                Base stats: 5   () => roll([...dices(1, 6)])
-                Total: 5
-        Calculation for Theon's dodge
-                Total: 0
-        Calculation for Theon's parry
-                Total: 0
-Rheon melee hit Theon rolling hit 5 against parry 0
-        Calculation for Rheon's meleeDamage
-                Sword strike: 14        () => roll([...dices(3, 6)])
-                Total: 14
-Rheon does 14 melee damage to Theon.
+                Sword strike: 10        () => roll([...dices(3, 6)])
+                Total: 10
+Rheon does 10 melee damage to Theon.
 Theon is dead.
 Rheon cannot target Theon because Theon is dead
-Theon recovered 5 mana.
+Rheon cannot target Theon because Theon is dead
 Rheon recovered 0 mana.
+Next turn
 ```

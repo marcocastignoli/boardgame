@@ -73,7 +73,7 @@ class Character {
             mana: () => -amount
         }, turn, `mana_${this.key}_${turn}`, `Mana at turn ${turn}`)
         this.mods.push(damage)
-        return this.getAttr("mana", turn, true)
+        return this.getAttr("mana", true, turn)
     }
     damage(amount, turn = this.turns) {
         const damage = new Mod({
@@ -99,7 +99,7 @@ class Character {
             const modSpell = new Mod(mod, turn, `spell_${this.key}_${turn}`, `Spell at turn ${turn}`)
             this.mods.push(modSpell)
         })
-        return this.getAttr("hp", turn, true)
+        return this.getAttr("hp", true, turn)
     }
     move(coords, turn) {
         const speed = this.getAttr("speed", true)
