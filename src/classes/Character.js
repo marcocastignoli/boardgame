@@ -52,6 +52,9 @@ class Character {
         return attribute
     }
     checkEndTurnMods(turn = this.turns) {
+        if (this.getAttr("hp", true, turn) <= 0) {
+            return false
+        }
         const endTurnMana = this.getAttr("endTurnMana", true, turn)
         const mana = this.getAttr("mana", true, turn)
         const maxMana = this.getAttr("maxMana", true, turn)
