@@ -102,8 +102,8 @@ class Game {
         if (!this.checkTarget(defender)) {
             return false
         }
-        if (!this.checkWalls(target)) {
-            console.log(`${this.activePlayer.label} cannot hit ${target.label} throught walls.`)
+        if (!this.checkWalls(defender)) {
+            console.log(`${this.activePlayer.label} cannot hit ${defender.label} throught walls.`)
             return false;
         }
         if (this.checkDistance(defender) > MAX_RANGED) {

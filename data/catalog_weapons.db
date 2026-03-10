@@ -1,0 +1,2 @@
+{"key":"sword_of_fire","label":"Sword of Fire","mods":[{"label":"Fire Damage","attributes":{"meleeDamage":{"type":"dice","count":1,"faces":8}}}],"gemSlots":[],"gemKeys":[],"_id":"2W2A6TK1aQ6YXr9C"}
+{"key":"goblin_staff","label":"Bastone del Goblin","mods":[{"label":"Base","attributes":{"meleeDamage":{"type":"fixed","value":2}}}],"gemSlots":[],"gemKeys":[],"_id":"B5dGzNCSTVhg0NeT"}

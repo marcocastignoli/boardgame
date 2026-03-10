@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronicles of Proxima</title>
+    <link rel="stylesheet" href="player.css">
+</head>
+<body>
+
+<!-- ======= JOIN OVERLAY ======= -->
+<div id="join-overlay">
+    <div id="join-panel">
+        <div class="join-title">
+            <div class="join-title-rune">⚔</div>
+            <h1>Chronicles of Proxima</h1>
+            <p class="join-subtitle">A Tactical Fantasy RPG</p>
+        </div>
+
+        <div id="join-step-game">
+            <h2>Choose Your Battle</h2>
+            <select id="join-game-select">
+                <option value="">Loading games...</option>
+            </select>
+            <button id="join-load-btn" disabled>Enter the Realm</button>
+            <div id="join-error" class="hidden"></div>
+        </div>
+
+        <div id="join-step-player" class="hidden">
+            <h2>Choose Your Champion</h2>
+            <div id="join-player-list"></div>
+            <button id="join-back-btn" class="secondary">← Back</button>
+        </div>
+    </div>
+</div>
+
+<!-- ======= GAME UI ======= -->
+<div id="game-ui" class="hidden">
+
+    <header id="game-header">
+        <div class="header-brand">
+            <span class="header-rune">⚔</span>
+            <span class="header-title">Chronicles of Proxima</span>
+        </div>
+        <div class="header-status">
+            <span id="turn-label">Turn 1</span>
+            <span id="active-label"></span>
+            <span id="my-turn-badge" class="hidden">YOUR TURN</span>
+        </div>
+        <div class="header-player">
+            <span id="my-player-label"></span>
+        </div>
+    </header>
+
+    <div id="main-layout">
+
+        <!-- LEFT: Map + Controls + Log -->
+        <div id="left-panel">
+
+            <section id="battlefield-section">
+                <div class="section-title">Battlefield</div>
+                <div id="map-grid"></div>
+            </section>
+
+            <section id="controls-section">
+                <div class="section-title">
+                    <span id="controls-title">Controls</span>
+                    <span id="waiting-label" class="waiting-text hidden">Waiting for your turn...</span>
+                </div>
+                <div id="controls-wrap">
+                    <div id="move-pad">
+                        <button class="move-btn pad-empty"></button>
+                        <button class="move-btn" data-dx="0" data-dy="-1" title="Move Up">↑</button>
+                        <button class="move-btn pad-empty"></button>
+                        <button class="move-btn" data-dx="-1" data-dy="0" title="Move Left">←</button>
+                        <button class="move-btn pad-center">·</button>
+                        <button class="move-btn" data-dx="1" data-dy="0" title="Move Right">→</button>
+                        <button class="move-btn pad-empty"></button>
+                        <button class="move-btn" data-dx="0" data-dy="1" title="Move Down">↓</button>
+                        <button class="move-btn pad-empty"></button>
+                    </div>
+
+                    <div id="combat-controls">
+                        <div class="control-row">
+                            <select id="attack-target"><option value="">Target...</option></select>
+                            <button id="melee-btn" class="action-btn melee">⚔ Melee</button>
+                            <button id="range-btn" class="action-btn range">🏹 Range</button>
+                        </div>
+                        <div class="control-row">
+                            <select id="spell-select"><option value="">Spell...</option></select>
+                            <select id="spell-target"><option value="">Target...</option></select>
+                            <button id="cast-btn" class="action-btn spell">✦ Cast</button>
+                        </div>
+                        <div class="control-row end-row">
+                            <button id="end-turn-btn" class="action-btn end-turn">End Turn →</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="combatants-section">
+                <div class="section-title">Combatants</div>
+                <div id="combatants-list"></div>
+            </section>
+
+            <section id="log-section">
+                <div class="section-title">Combat Log</div>
+                <div id="log-output"></div>
+            </section>
+
+        </div>
+
+        <!-- RIGHT: Oracle Chat -->
+        <div id="oracle-panel">
+            <div class="oracle-header">
+                <div class="oracle-eye">◈</div>
+                <h2>The Oracle</h2>
+                <p>Ask for guidance or command your champion</p>
+            </div>
+
+            <div id="chat-messages"></div>
+
+            <div id="chat-pending" class="hidden">
+                <div class="pending-title">⚡ Proposed Action</div>
+                <div id="pending-description"></div>
+                <div class="pending-btns">
+                    <button id="confirm-action-btn" class="confirm-btn">Execute</button>
+                    <button id="cancel-action-btn" class="cancel-btn">Cancel</button>
+                </div>
+            </div>
+
+            <div id="chat-input-row">
+                <input id="chat-input" type="text" placeholder="Ask the Oracle..." autocomplete="off">
+                <button id="chat-send-btn">Ask</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="player.js"></script>
+</body>
+</html>

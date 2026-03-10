@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronicles of Proxima</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Chronicles of Proxima</h1>
+        <div id="turn-info">
+            <span id="turn-label">Turn: —</span>
+            <span id="active-player-label">No active player</span>
+            <span id="actions-label">Actions: —</span>
+        </div>
+        <div id="game-controls">
+            <button id="new-game-btn">New Game</button>
+            <select id="load-game-select"><option value="">Load saved game...</option></select>
+            <button id="load-game-btn">Load</button>
+        </div>
+    </header>
+
+    <div id="page-layout">
+        <!-- Left: game + log -->
+        <div id="game-panel">
+            <main>
+                <!-- Map -->
+                <section id="map-section">
+                    <h2>Battlefield</h2>
+                    <div id="map-grid"></div>
+                    <div id="map-legend">
+                        <span class="legend-item"><span class="legend-sand"></span> Sand</span>
+                        <span class="legend-item"><span class="legend-wall"></span> Wall</span>
+                        <span class="legend-item"><span class="legend-char"></span> Character</span>
+                    </div>
+                </section>
+
+                <!-- Actions Panel -->
+                <section id="actions-section">
+                    <h2>Actions</h2>
+
+                    <div class="action-group">
+                        <h3>Turn Order</h3>
+                        <div id="turn-order-list"></div>
+                        <button id="end-player-turn-btn" class="end-player-turn">End Player Turn →</button>
+                    </div>
+
+                    <div class="action-group">
+                        <h3>GM Override</h3>
+                        <div id="set-player-btns"></div>
+                    </div>
+
+                    <div class="action-group">
+                        <h3>Move</h3>
+                        <div class="move-pad">
+                            <button class="move-btn" data-dx="0" data-dy="-1">↑</button>
+                            <div class="move-row">
+                                <button class="move-btn" data-dx="-1" data-dy="0">←</button>
+                                <button class="move-btn" data-dx="1" data-dy="0">→</button>
+                            </div>
+                            <button class="move-btn" data-dx="0" data-dy="1">↓</button>
+                        </div>
+                    </div>
+
+                    <div class="action-group">
+                        <h3>Attack</h3>
+                        <div class="attack-row">
+                            <select id="attack-target">
+                                <option value="">Select target...</option>
+                            </select>
+                            <button id="melee-btn">Melee</button>
+                            <button id="range-btn">Range</button>
+                        </div>
+                    </div>
+
+                    <div class="action-group">
+                        <h3>Cast Spell</h3>
+                        <div class="spell-row">
+                            <select id="spell-select">
+                                <option value="">Select spell...</option>
+                            </select>
+                            <select id="spell-target">
+                                <option value="">Select target...</option>
+                            </select>
+                            <button id="cast-btn">Cast</button>
+                        </div>
+                    </div>
+
+                    <div class="action-group">
+                        <button id="end-turn-btn" class="gm-btn">Force End Round (GM)</button>
+                    </div>
+                </section>
+
+                <!-- Players Stats -->
+                <section id="players-section">
+                    <h2>Characters</h2>
+                    <div id="players-list"></div>
+                </section>
+            </main>
+
+            <!-- Log -->
+            <section id="log-section">
+                <h2>Combat Log</h2>
+                <div id="log-output"></div>
+            </section>
+        </div>
+
+        <!-- Right: chat sidebar -->
+        <section id="chat-section">
+            <h2>🔮 Gemini Assistant</h2>
+            <p class="chat-hint">Describe what you want to do and Gemini will translate it into a game action.</p>
+            <div id="chat-messages"></div>
+            <div id="chat-pending" class="hidden">
+                <div class="pending-action">
+                    <p id="pending-description"></p>
+                    <button id="confirm-action-btn">Confirm</button>
+                    <button id="cancel-action-btn">Cancel</button>
+                </div>
+            </div>
+            <div id="chat-input-row">
+                <input type="text" id="chat-input" placeholder="e.g. Attack Rheon with fireball..." />
+                <button id="chat-send-btn">Send</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- World Explorer (below the fold, scroll to see) -->
+    <section id="explorer-section">
+        <h2>World Explorer</h2>
+        <div id="explorer-tabs">
+            <button class="tab-btn active" data-tab="weapons">Weapons</button>
+            <button class="tab-btn" data-tab="armors">Armors</button>
+            <button class="tab-btn" data-tab="spells">Spells</button>
+            <button class="tab-btn" data-tab="gems">Gems</button>
+        </div>
+        <div id="explorer-content"></div>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>
