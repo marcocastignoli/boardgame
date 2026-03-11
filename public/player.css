@@ -732,6 +732,123 @@ select:focus { border-color: var(--gold-dim); }
 #chat-send-btn:hover:not(:disabled) { background: rgba(123,75,219,0.4); }
 #chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ===== NPC tokens ===== */
+.npc-token {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--gold, #c9a227);
+    color: #000;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.5);
+    transition: transform 0.1s;
+}
+.npc-token:hover { transform: scale(1.15); border-color: #fff; }
+.npc-token.dead { opacity: 0.4; cursor: default; }
+
+/* ===== Objective markers ===== */
+.objective-marker {
+    position: absolute;
+    font-size: 18px;
+    color: #ffe066;
+    text-shadow: 0 0 6px #ffb700, 0 0 12px #ffb700;
+    pointer-events: none;
+    animation: pulse-marker 1.5s ease-in-out infinite;
+}
+@keyframes pulse-marker {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ===== Locked zone cells ===== */
+.map-cell.locked-zone {
+    background: repeating-linear-gradient(
+        45deg,
+        #2a1a0a,
+        #2a1a0a 4px,
+        #1a0a00 4px,
+        #1a0a00 8px
+    ) !important;
+    border-color: #8b4513;
+}
+
+/* ===== Quest Panel ===== */
+#quest-panel {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--gold, #c9a227);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 10px;
+}
+#quest-panel .section-title { color: var(--gold, #c9a227); font-size: 13px; margin-bottom: 4px; }
+#quest-description { color: rgba(255,255,255,0.5); font-size: 12px; margin-bottom: 8px; }
+.quest-objective {
+    font-size: 13px;
+    padding: 3px 0;
+    color: rgba(255,255,255,0.55);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.quest-objective.completed { color: #4caf50; text-decoration: line-through; }
+.quest-objective:last-child { border-bottom: none; }
+
+/* ===== Dialog Modal ===== */
+#dialog-modal {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    padding: 0 16px 16px;
+    z-index: 100;
+    pointer-events: none;
+}
+#dialog-box {
+    background: #1a1020;
+    border: 2px solid var(--gold, #c9a227);
+    border-radius: 10px;
+    padding: 16px 20px;
+    max-width: 560px;
+    width: 100%;
+    pointer-events: all;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
+}
+#dialog-speaker {
+    color: var(--gold, #c9a227);
+    font-weight: bold;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+}
+#dialog-text {
+    color: rgba(255,255,255,0.9);
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    font-style: italic;
+}
+#dialog-choices { display: flex; flex-direction: column; gap: 6px; }
+.dialog-choice-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.85);
+    text-align: left;
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.dialog-choice-btn:hover:not(:disabled) {
+    border-color: var(--gold, #c9a227);
+    background: rgba(201,162,39,0.12);
+    color: var(--gold, #c9a227);
+}
+.dialog-choice-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 820px) {
     #main-layout { grid-template-columns: 1fr; }

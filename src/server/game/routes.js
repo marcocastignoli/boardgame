@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { createGame, listGames, getGameState, performAction, spawnPlayer, removePlayer, getRoster, registerWeapon, registerArmor, registerGem, registerSpell, buildGeminiContext, addSseClient, removeSseClient } from './gameManager.js'
+import { createGame, listGames, getGameState, performAction, spawnPlayer, removePlayer, getRoster, registerWeapon, registerArmor, registerGem, registerSpell, buildGeminiContext, addSseClient, removeSseClient, attachQuest } from './gameManager.js'
 import config from '../../config.js'
 
 export default function gameRoutes(app) {
@@ -73,6 +73,28 @@ export default function gameRoutes(app) {
     app.post('/api/game/:gameId/players', async (req, res) => {
         try {
             const state = await spawnPlayer(req.params.gameId, req.body)
+            res.json({ state })
+        } catch (e) {
+            res.status(400).json({ error: e.message })
+        }
+    })
+
+    // Attach a quest to a game
+    // Body: quest definition (see QUEST_GENERATION.md)
+    // Create a new game and immediately attach a quest
+    app.post('/api/game/new/quest', async (req, res) => {
+        try {
+            const gameId = await createGame()
+            const state = await attachQuest(gameId, req.body)
+            res.json({ gameId, state })
+        } catch (e) {
+            res.status(400).json({ error: e.message })
+        }
+    })
+
+    app.post('/api/game/:gameId/quest', async (req, res) => {
+        try {
+            const state = await attachQuest(req.params.gameId, req.body)
             res.json({ state })
         } catch (e) {
             res.status(400).json({ error: e.message })

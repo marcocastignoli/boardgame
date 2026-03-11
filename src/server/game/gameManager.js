@@ -8,6 +8,7 @@ import { Weapon, Armor } from '../../classes/Items.js'
 import Spell from '../../classes/Spell.js'
 import Character from '../../classes/Character.js'
 import Game from '../../classes/Game.js'
+import Quest from '../../classes/Quest.js'
 import modifiers from '../../var/modifiers.js'
 import spellDamages from '../../var/damages.js'
 import map from '../../../maps/test.js'
@@ -281,7 +282,7 @@ function restoreDynamicMod(savedMod) {
 function serializeGameForDb(gameId) {
     const data = games.get(gameId)
     if (!data) return null
-    const { game, players, logs, playerSpecs } = data
+    const { game, players, logs, playerSpecs, quest } = data
     return {
         gameId,
         turn: game.turn,
@@ -295,7 +296,9 @@ function serializeGameForDb(gameId) {
             cell: p.cell,
             turns: p.turns,
             dynamicMods: serializeDynamicMods(p)
-        }))
+        })),
+        quest: quest ? quest.serializeForDb() : null,
+        map: game.map
     }
 }
 
@@ -318,12 +321,15 @@ function restoreGame(saved) {
         return char
     })
     const activePlayer = players.find(p => p.key === saved.activePlayerKey) || null
-    const game = new Game(players, saved.turn, saved.actionsActivePlayer, activePlayer, map)
+    const gameMap = saved.map || map
+    const game = new Game(players, saved.turn, saved.actionsActivePlayer, activePlayer, gameMap)
     const playerSpecs = {}
     playerSpecsList.forEach(ps => {
         playerSpecs[ps.key] = { key: ps.key, label: ps.label, weap1Key: ps.weap1Key, weap2Key: ps.weap2Key, armorKey: ps.armorKey, spellKeys: ps.spellKeys }
     })
-    games.set(saved.gameId, { game, players, logs: saved.logs || [], playerSpecs, turnOrder: saved.turnOrder || players.map(p => p.key), turnOrderIndex: saved.turnOrderIndex !== undefined ? saved.turnOrderIndex : -1 })
+    const quest = saved.quest ? Quest.fromDb(saved.quest) : null
+    const dynamicWalls = quest ? quest.getWallCells() : new Set()
+    games.set(saved.gameId, { game, players, logs: saved.logs || [], playerSpecs, turnOrder: saved.turnOrder || players.map(p => p.key), turnOrderIndex: saved.turnOrderIndex !== undefined ? saved.turnOrderIndex : -1, quest, dynamicWalls })
 }
 
 // ===== Log capture =====
@@ -350,8 +356,9 @@ function captureLog(fn, allLogs) {
 }
 
 // ===== State serialization =====
-function serializeState(gameId, game, players, logs, turnOrder = [], turnOrderIndex = -1) {
+function serializeState(gameId, game, players, logs, turnOrder = [], turnOrderIndex = -1, quest = null) {
     const wall = game.map.layers.find(l => l.name === "wall")
+    const npcKeys = quest ? new Set(Object.keys(quest.npcDialogs)) : new Set() // dialog NPCs → rendered as NPC tokens
     return {
         gameId,
         turn: game.turn,
@@ -371,6 +378,7 @@ function serializeState(gameId, game, players, logs, turnOrder = [], turnOrderIn
                 dodge: p.getAttr('dodge', true),
                 actions: p.getAttr('actions', true),
                 speed: p.getAttr('speed', true),
+                isNpc: npcKeys.has(p.key),
                 spells: p.spells.map(s => ({
                     key: s.key,
                     label: s.label,
@@ -387,14 +395,16 @@ function serializeState(gameId, game, players, logs, turnOrder = [], turnOrderIn
         map: {
             width: game.map.width,
             height: game.map.height,
-            walls: wall.data
+            walls: wall.data,
+            lockedZoneCells: quest ? Array.from(quest.getWallCells()).map(s => s.split(',').map(Number)) : []
         },
         logs: logs.slice(-30),
         turnOrder: turnOrder.map(key => {
             const p = players.find(pl => pl.key === key)
             return { key, label: p?.label || key, alive: p ? p.getAttr('hp', true) > 0 : false }
         }),
-        turnOrderIndex
+        turnOrderIndex,
+        quest: quest ? quest.serialize() : null
     }
 }
 
@@ -406,7 +416,7 @@ export async function createGame() {
     const logs = ['Game created. Set an active player to begin.']
     const playerSpecs = {}
     TEST_SPECS.forEach(spec => { playerSpecs[spec.key] = spec })
-    games.set(gameId, { game, players, logs, playerSpecs, turnOrder: players.map(p => p.key), turnOrderIndex: -1 })
+    games.set(gameId, { game, players, logs, playerSpecs, turnOrder: players.map(p => p.key), turnOrderIndex: -1, quest: null, dynamicWalls: new Set() })
     await saveGameToDb(gameId)
     return gameId
 }
@@ -424,13 +434,14 @@ export function listGames() {
 export function getGameState(gameId) {
     const data = games.get(gameId)
     if (!data) throw new Error('Game not found')
-    return serializeState(gameId, data.game, data.players, data.logs, data.turnOrder, data.turnOrderIndex)
+    return serializeState(gameId, data.game, data.players, data.logs, data.turnOrder, data.turnOrderIndex, data.quest)
 }
 
 export async function performAction(gameId, action) {
     const data = games.get(gameId)
     if (!data) throw new Error('Game not found')
     const { game, players, logs } = data
+    const { quest, dynamicWalls } = data
 
     const findPlayer = key => players.find(p => p.key === key)
 
@@ -444,25 +455,74 @@ export async function performAction(gameId, action) {
             break
         }
         case 'move': {
+            // Check dynamic walls (locked zones) before delegating to game
+            if (game.activePlayer && dynamicWalls.size > 0) {
+                const current = game.activePlayer.cell
+                const dest = [current[0] + action.coords[0], current[1] + action.coords[1]]
+                if (dynamicWalls.has(`${dest[0]},${dest[1]}`)) {
+                    actionLogs = [`${game.activePlayer.label} cannot pass — the way is blocked.`]
+                    logs.push(...actionLogs)
+                    error = 'Blocked by locked zone'
+                    break
+                }
+            }
             ;({ logs: actionLogs, error } = captureLog(() => game.activePlayerMove(action.coords), logs))
+            // Check reach_cell objectives after successful move
+            if (!error && quest && game.activePlayer) {
+                const completed = quest.checkReachObjectives(game.activePlayer.cell)
+                for (const key of completed) {
+                    const msg = `Objective complete: ${quest.objectives[key].description}`
+                    logs.push(msg)
+                    actionLogs = actionLogs || []
+                    actionLogs.push(msg)
+                }
+            }
             break
         }
         case 'attack-melee': {
             const defender = findPlayer(action.targetKey)
             if (!defender) throw new Error('Target not found')
             ;({ logs: actionLogs, error } = captureLog(() => game.activePlayerAttackMelee(defender), logs))
+            // Check kill objectives
+            if (!error && quest && defender.getAttr('hp', true) <= 0) {
+                const completed = quest.checkKillObjective(defender.key)
+                for (const key of completed) {
+                    const msg = `Objective complete: ${quest.objectives[key].description}`
+                    logs.push(msg)
+                    actionLogs = actionLogs || []
+                    actionLogs.push(msg)
+                }
+            }
             break
         }
         case 'attack-range': {
             const defender = findPlayer(action.targetKey)
             if (!defender) throw new Error('Target not found')
             ;({ logs: actionLogs, error } = captureLog(() => game.activePlayerAttackRange(defender), logs))
+            if (!error && quest && defender.getAttr('hp', true) <= 0) {
+                const completed = quest.checkKillObjective(defender.key)
+                for (const key of completed) {
+                    const msg = `Objective complete: ${quest.objectives[key].description}`
+                    logs.push(msg)
+                    actionLogs = actionLogs || []
+                    actionLogs.push(msg)
+                }
+            }
             break
         }
         case 'cast-spell': {
             const target = findPlayer(action.targetKey)
             if (!target) throw new Error('Target not found')
             ;({ logs: actionLogs, error } = captureLog(() => game.activePlayerCastSpell(action.spellKey, target), logs))
+            if (!error && quest && target.getAttr('hp', true) <= 0) {
+                const completed = quest.checkKillObjective(target.key)
+                for (const key of completed) {
+                    const msg = `Objective complete: ${quest.objectives[key].description}`
+                    logs.push(msg)
+                    actionLogs = actionLogs || []
+                    actionLogs.push(msg)
+                }
+            }
             break
         }
         case 'next-turn': {
@@ -495,11 +555,13 @@ export async function performAction(gameId, action) {
             let nextIndex = (data.turnOrderIndex + 1) % turnOrder.length
             let roundEnded = nextIndex === 0 && data.turnOrderIndex !== -1
 
-            // Skip dead players
+            // Skip dead players and NPCs
+            const npcKeys = data.quest ? data.quest.allNpcKeys : new Set()
             let attempts = 0
             while (attempts < turnOrder.length) {
                 const candidate = findPlayer(turnOrder[nextIndex])
-                if (candidate && candidate.getAttr('hp', true) > 0) break
+                const isNpc = npcKeys.has(turnOrder[nextIndex])
+                if (candidate && candidate.getAttr('hp', true) > 0 && !isNpc) break
                 nextIndex = (nextIndex + 1) % turnOrder.length
                 if (nextIndex === 0) roundEnded = true
                 attempts++
@@ -518,6 +580,55 @@ export async function performAction(gameId, action) {
             actionLogs.push(...setLogs)
             break
         }
+        case 'talk-to-npc': {
+            if (!quest) throw new Error('No quest active')
+            if (!game.activePlayer) throw new Error('No active player')
+            const npc = findPlayer(action.npcKey)
+            if (!npc) throw new Error(`NPC not found: ${action.npcKey}`)
+            // Check adjacency (distance ≤ 1.5 covers same cell and orthogonal/diagonal neighbours)
+            const ap = game.activePlayer.cell
+            const nc = npc.cell
+            const dist = Math.sqrt(Math.pow(nc[0] - ap[0], 2) + Math.pow(nc[1] - ap[1], 2))
+            if (dist > 1.5) throw new Error(`${npc.label} is too far away to talk`)
+            quest.startDialog(action.npcKey)
+            actionLogs = [`${game.activePlayer.label} approaches ${npc.label}.`]
+            logs.push(...actionLogs)
+            break
+        }
+        case 'dialog-choice': {
+            if (!quest) throw new Error('No quest active')
+            if (!quest.activeDialog) throw new Error('No active dialog')
+            const { effects } = quest.applyChoice(action.choiceIndex)
+            actionLogs = []
+            // Apply effects
+            for (const effect of effects) {
+                if (effect.type === 'complete_objective') {
+                    const completed = quest.completeObjective(effect.objectiveKey)
+                    if (completed) {
+                        const msg = `Objective complete: ${quest.objectives[effect.objectiveKey]?.description || effect.objectiveKey}`
+                        logs.push(msg)
+                        actionLogs.push(msg)
+                    }
+                } else if (effect.type === 'unlock_zone') {
+                    const cells = quest.unlockZone(effect.zoneKey)
+                    for (const [x, y] of cells) {
+                        dynamicWalls.delete(`${x},${y}`)
+                    }
+                    if (cells.length > 0) {
+                        const msg = `A path has been opened.`
+                        logs.push(msg)
+                        actionLogs.push(msg)
+                    }
+                } else if (effect.type === 'advance_stage') {
+                    quest.stage = effect.stage
+                    const stageDef = quest.stages.find(s => s.id === effect.stage)
+                    const msg = stageDef ? `New objective: ${stageDef.description}` : `Stage advanced.`
+                    logs.push(msg)
+                    actionLogs.push(msg)
+                }
+            }
+            break
+        }
         default:
             throw new Error(`Unknown action: ${action.type}`)
     }
@@ -528,7 +639,7 @@ export async function performAction(gameId, action) {
         success: !error,
         error,
         actionLogs,
-        state: serializeState(gameId, game, players, logs, data.turnOrder, data.turnOrderIndex)
+        state: serializeState(gameId, game, players, logs, data.turnOrder, data.turnOrderIndex, data.quest)
     }
 }
 
@@ -544,7 +655,7 @@ export async function spawnPlayer(gameId, spec) {
     logs.push(`${character.label} joined the game at [${character.cell}].`)
     await saveGameToDb(gameId)
     broadcastState(gameId)
-    return serializeState(gameId, game, players, logs, data.turnOrder, data.turnOrderIndex)
+    return serializeState(gameId, game, players, logs, data.turnOrder, data.turnOrderIndex, data.quest)
 }
 
 export async function removePlayer(gameId, playerKey) {
@@ -567,7 +678,74 @@ export async function removePlayer(gameId, playerKey) {
     logs.push(`${removed.label} was removed from the game.`)
     await saveGameToDb(gameId)
     broadcastState(gameId)
-    return serializeState(gameId, game, players, logs, data.turnOrder, data.turnOrderIndex)
+    return serializeState(gameId, game, players, logs, data.turnOrder, data.turnOrderIndex, data.quest)
+}
+
+export async function attachQuest(gameId, questDef) {
+    const data = games.get(gameId)
+    if (!data) throw new Error('Game not found')
+    const { game, players, logs, playerSpecs } = data
+
+    const quest = new Quest(questDef)
+
+    // Replace map if quest provides one
+    if (questDef.map) {
+        game.map = questDef.map
+        logs.push(`Map loaded: ${questDef.map.width}×${questDef.map.height}`)
+    }
+
+    // Replace player roster if quest defines its own players
+    if (questDef.players && questDef.players.length > 0) {
+        players.length = 0
+        data.turnOrder.length = 0
+        for (const key of Object.keys(playerSpecs)) delete playerSpecs[key]
+        for (const p of questDef.players) {
+            const char = buildCharacter({
+                key: p.key, label: p.label,
+                weap1Key: p.weap1Key || null, weap2Key: p.weap2Key || null,
+                armorKey: p.armorKey || null, spellKeys: p.spellKeys || [],
+                cell: p.cell || [0, 0]
+            })
+            players.push(char)
+            data.turnOrder.push(p.key)
+            playerSpecs[p.key] = { key: p.key, label: p.label, weap1Key: p.weap1Key || null, weap2Key: p.weap2Key || null, armorKey: p.armorKey || null, spellKeys: p.spellKeys || [] }
+        }
+        game.activePlayer = null
+        game.actionsActivePlayer = 0
+        data.turnOrderIndex = -1
+    }
+
+    // Spawn NPCs defined in quest definition (replace if already exists, to allow quest reset)
+    for (const npc of (questDef.npcs || [])) {
+        const existingIdx = players.findIndex(p => p.key === npc.key)
+        const char = buildCharacter({
+            key: npc.key,
+            label: npc.label,
+            weap1Key: npc.weap1Key || null,
+            weap2Key: npc.weap2Key || null,
+            armorKey: npc.armorKey || null,
+            spellKeys: npc.spellKeys || [],
+            cell: npc.cell || [0, 0]
+        })
+        if (existingIdx !== -1) {
+            players[existingIdx] = char // replace (resets hp, alive, cell, etc.)
+        } else {
+            players.push(char)
+            data.turnOrder.push(npc.key)
+        }
+        playerSpecs[npc.key] = { key: npc.key, label: npc.label, weap1Key: npc.weap1Key || null, weap2Key: npc.weap2Key || null, armorKey: npc.armorKey || null, spellKeys: npc.spellKeys || [] }
+        logs.push(`${npc.label} appears.`)
+    }
+
+    // Build dynamic walls from locked zones
+    const dynamicWalls = quest.getWallCells()
+    data.quest = quest
+    data.dynamicWalls = dynamicWalls
+
+    logs.push(`Quest started: ${quest.title}`)
+    await saveGameToDb(gameId)
+    broadcastState(gameId)
+    return serializeState(gameId, game, players, logs, data.turnOrder, data.turnOrderIndex, data.quest)
 }
 
 export function buildGeminiContext(state, roster) {
@@ -586,6 +764,35 @@ export function buildGeminiContext(state, roster) {
         `  Gems:    ${roster.gems.map(g => `${g.label} (key:"${g.key}", color:${g.color})`).join(', ')}`
     ].join('\n') : '  (not available)'
 
+    const questDesc = state.quest ? `
+## Active Quest: ${state.quest.title}
+${state.quest.description}
+Stage: ${state.quest.stage}
+Objectives:
+${state.quest.objectives.map(o => `  [${o.status === 'completed' ? 'X' : ' '}] ${o.description}`).join('\n')}
+${state.quest.activeDialog ? `
+Active dialog with NPC "${state.quest.activeDialog.npcKey}":
+  ${state.quest.activeDialog.node?.speaker}: "${state.quest.activeDialog.node?.text}"
+  Choices:
+${(state.quest.activeDialog.node?.choices || []).map((c, i) => `    ${i}. "${c.text}"`).join('\n')}
+` : ''}` : ''
+
+    // Build ASCII map from wall layer
+    const wallLayer = state.map ? state.map.layers?.find(l => l.name === 'wall') : null
+    const mapW = state.map?.width || 10
+    const mapH = state.map?.height || 10
+    let mapDesc = `${mapW}×${mapH} grid.\n`
+    mapDesc += '  ' + Array.from({length: mapW}, (_, i) => i % 10).join(' ') + '\n'
+    for (let row = 0; row < mapH; row++) {
+        const cells = Array.from({length: mapW}, (_, col) => {
+            const idx = row * mapW + col
+            return wallLayer?.data[idx] > 0 ? 'W' : '.'
+        })
+        mapDesc += `${String(row).padStart(2)} ${cells.join(' ')}`
+        if (row < mapH - 1) mapDesc += '\n'
+    }
+    mapDesc += '\nW = wall. . = open cell.'
+
     return `
 You are a game master assistant for Chronicles of Proxima, a tactical turn-based RPG.
 You can BOTH manage the game world (create items, spells, spawn characters) AND control in-game actions.
@@ -597,9 +804,9 @@ Actions used this turn: ${state.actionsActivePlayer}/${active ? active.actions :
 
 ## Players in game
 ${playerDesc}
-
+${questDesc}
 ## Map
-10x10 grid. Walls run vertically at columns 4-5, rows 1-7.
+${mapDesc}
 
 ## Available roster (items/spells you can use when spawning characters)
 ${rosterDesc}
@@ -632,6 +839,8 @@ action.type = one of:
   "attack-range"       → { "targetKey": one of [${playerKeys}] }   (max 10 cells, needs line of sight)
   "cast-spell"         → { "spellKey": "<spell key>", "targetKey": one of [${playerKeys}] }
   "next-turn"          → {}
+  "talk-to-npc"        → { "npcKey": "<npc player key>" }   (active player must be adjacent to NPC)
+  "dialog-choice"      → { "choiceIndex": <integer> }   (pick a choice in the active dialog)
 
 ### "spawn-player" — add a new character to the game
 action = {

@@ -71,7 +71,7 @@ function showPlayerStep(gameState) {
 
     const list = document.getElementById('join-player-list')
     list.innerHTML = ''
-    gameState.players.filter(p => p.alive).forEach(p => {
+    gameState.players.filter(p => p.alive && !p.isNpc).forEach(p => {
         const card = document.createElement('div')
         card.className = `player-pick-card ${p.key}`
         card.innerHTML = `
@@ -158,6 +158,7 @@ function applyState(newState) {
     renderHeader()
     renderCombatants()
     updateControls()
+    renderQuest(state.quest)
 }
 
 // ===== Header =====
@@ -178,29 +179,55 @@ function renderHeader() {
 function renderMap() {
     const grid = document.getElementById('map-grid')
     grid.innerHTML = ''
-    const { width, height, walls } = state.map
+    const { width, height, walls, lockedZoneCells = [] } = state.map
+    const lockedSet = new Set(lockedZoneCells.map(([x, y]) => `${x},${y}`))
+    const markerMap = new Map()
+    for (const m of (state.quest?.objectiveMarkers || [])) {
+        markerMap.set(`${m.cell[0]},${m.cell[1]}`, m)
+    }
 
     for (let row = 0; row < height; row++) {
         for (let col = 0; col < width; col++) {
             const idx = row * width + col
             const isWall = walls[idx] !== 0
+            const isLocked = lockedSet.has(`${col},${row}`)
 
             const cell = document.createElement('div')
-            cell.className = 'map-cell' + (isWall ? ' wall' : '')
+            cell.className = 'map-cell' + (isWall || isLocked ? ' wall' : '') + (isLocked ? ' locked-zone' : '')
 
             const coord = document.createElement('span')
             coord.className = 'coord'
             coord.textContent = `${col},${row}`
             cell.appendChild(coord)
 
+            // Objective marker
+            const marker = markerMap.get(`${col},${row}`)
+            if (marker) {
+                const mk = document.createElement('div')
+                mk.className = 'objective-marker'
+                mk.title = marker.description
+                mk.textContent = '◎'
+                cell.appendChild(mk)
+            }
+
             const charsHere = state.players.filter(p => p.cell[0] === col && p.cell[1] === row)
             charsHere.forEach(p => {
                 const token = document.createElement('div')
                 const isActive = p.key === state.activePlayerKey
                 const isMe = p.key === myPlayerKey
-                token.className = `char-token ${p.key}${isActive ? ' active' : ''}${!p.alive ? ' dead' : ''}${isMe ? ' mine' : ''}`
+                if (p.isNpc) {
+                    token.className = `npc-token ${p.key}${!p.alive ? ' dead' : ''}`
+                    token.title = `${p.label} — Click to talk (must be adjacent)`
+                    token.addEventListener('click', () => {
+                        if (gameId && isMyTurn()) {
+                            doAction({ type: 'talk-to-npc', npcKey: p.key })
+                        }
+                    })
+                } else {
+                    token.className = `char-token ${p.key}${isActive ? ' active' : ''}${!p.alive ? ' dead' : ''}${isMe ? ' mine' : ''}`
+                    token.title = `${p.label} — HP: ${p.hp}, Mana: ${p.mana}`
+                }
                 token.textContent = p.label.substring(0, 2).toUpperCase()
-                token.title = `${p.label} — HP: ${p.hp}, Mana: ${p.mana}`
                 cell.appendChild(token)
             })
 
@@ -252,6 +279,59 @@ function renderCombatants() {
         `
         list.appendChild(card)
     })
+}
+
+// ===== Quest =====
+function renderQuest(quest) {
+    const panel = document.getElementById('quest-panel')
+    const modal = document.getElementById('dialog-modal')
+
+    if (!quest) {
+        panel.classList.add('hidden')
+        modal.classList.add('hidden')
+        return
+    }
+
+    panel.classList.remove('hidden')
+    document.getElementById('quest-title').textContent = quest.title
+    document.getElementById('quest-description').textContent = quest.description
+
+    const objList = document.getElementById('quest-objectives')
+    objList.innerHTML = ''
+    quest.objectives.forEach(obj => {
+        const item = document.createElement('div')
+        item.className = `quest-objective ${obj.status}`
+        item.textContent = (obj.status === 'completed' ? '✓ ' : '◻ ') + obj.description
+        objList.appendChild(item)
+    })
+
+    if (quest.activeDialog && quest.activeDialog.node) {
+        const { node, npcKey } = quest.activeDialog
+        modal.classList.remove('hidden')
+        document.getElementById('dialog-speaker').textContent = node.speaker || npcKey
+        document.getElementById('dialog-text').textContent = node.text
+
+        const choicesEl = document.getElementById('dialog-choices')
+        choicesEl.innerHTML = ''
+        node.choices.forEach((choice, i) => {
+            const btn = document.createElement('button')
+            btn.className = 'dialog-choice-btn'
+            btn.textContent = choice.text
+            btn.disabled = !isMyTurn()
+            btn.addEventListener('click', () => doAction({ type: 'dialog-choice', choiceIndex: i }))
+            choicesEl.appendChild(btn)
+        })
+
+        if (node.choices.length === 0) {
+            const btn = document.createElement('button')
+            btn.className = 'dialog-choice-btn'
+            btn.textContent = '[Continue]'
+            btn.addEventListener('click', () => modal.classList.add('hidden'))
+            choicesEl.appendChild(btn)
+        }
+    } else {
+        modal.classList.add('hidden')
+    }
 }
 
 // ===== Controls =====

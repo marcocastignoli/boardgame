@@ -33,6 +33,8 @@
                         <span class="legend-item"><span class="legend-sand"></span> Sand</span>
                         <span class="legend-item"><span class="legend-wall"></span> Wall</span>
                         <span class="legend-item"><span class="legend-char"></span> Character</span>
+                        <span class="legend-item"><span class="legend-npc"></span> NPC</span>
+                        <span class="legend-item"><span class="legend-locked"></span> Locked</span>
                     </div>
                 </section>
 
@@ -104,6 +106,22 @@
                 <h2>Combat Log</h2>
                 <div id="log-output"></div>
             </section>
+
+            <!-- Quest Panel -->
+            <section id="quest-panel" class="hidden">
+                <h2>Quest: <span id="quest-title"></span></h2>
+                <p id="quest-description"></p>
+                <div id="quest-objectives"></div>
+            </section>
+        </div>
+
+        <!-- Dialog Modal -->
+        <div id="dialog-modal" class="hidden">
+            <div id="dialog-box">
+                <div id="dialog-speaker"></div>
+                <div id="dialog-text"></div>
+                <div id="dialog-choices"></div>
+            </div>
         </div>
 
         <!-- Right: chat sidebar -->
