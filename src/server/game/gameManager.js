@@ -396,7 +396,8 @@ function serializeState(gameId, game, players, logs, turnOrder = [], turnOrderIn
             width: game.map.width,
             height: game.map.height,
             walls: wall.data,
-            lockedZoneCells: quest ? Array.from(quest.getWallCells()).map(s => s.split(',').map(Number)) : []
+            lockedZoneCells: quest ? Array.from(quest.getWallCells()).map(s => s.split(',').map(Number)) : [],
+            terrain: quest?.terrain || 'sand'
         },
         logs: logs.slice(-30),
         turnOrder: turnOrder.map(key => {

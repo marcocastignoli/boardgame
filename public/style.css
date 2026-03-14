@@ -156,72 +156,76 @@ section {
     grid-template-columns: repeat(10, 48px);
     grid-template-rows: repeat(10, 48px);
     gap: 1px;
-    background: var(--cell-border);
+    background: #1a0d05;
     border: 2px solid var(--accent2);
     border-radius: 4px;
+    image-rendering: pixelated;
 }
 
 .map-cell {
     width: 48px;
     height: 48px;
-    background: var(--sand);
+    background-image: url('sprites/floor.png');
+    background-size: 100% 100%;
+    image-rendering: pixelated;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: default;
     transition: filter 0.1s;
-    font-size: 10px;
-    font-weight: 600;
 }
 
-.map-cell:hover { filter: brightness(1.2); }
+.map-cell:hover { filter: brightness(1.15); }
 
 .map-cell.wall {
-    background: var(--wall);
-    border: 1px inset var(--wall-border);
-    background-image: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 4px,
-        rgba(90,58,42,0.3) 4px,
-        rgba(90,58,42,0.3) 8px
-    );
+    background-image: url('sprites/wall.png');
+    background-size: 100% 100%;
+}
+
+/* ===== Terrain variants ===== */
+#map-grid[data-terrain="grass"] .map-cell:not(.wall):not(.locked-zone) {
+    background-image: url('sprites/grass.png');
+}
+#map-grid[data-terrain="snow"] .map-cell:not(.wall):not(.locked-zone) {
+    background-image: url('sprites/snow.png');
 }
 
 .map-cell .coord {
     position: absolute;
     bottom: 1px;
     right: 2px;
-    font-size: 8px;
-    color: rgba(0,0,0,0.35);
+    font-size: 7px;
+    color: rgba(0,0,0,0.45);
     line-height: 1;
+    font-family: monospace;
+    pointer-events: none;
 }
 
 .char-token {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    color: #fff;
-    border: 2px solid rgba(255,255,255,0.5);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    width: 38px;
+    height: 38px;
+    image-rendering: pixelated;
     position: relative;
     z-index: 1;
+    cursor: default;
+    display: block;
+    transition: outline 0.2s, filter 0.2s;
 }
 
-.char-token.theon { background: var(--theon); box-shadow: 0 0 8px var(--theon); }
-.char-token.rheon { background: var(--rheon); box-shadow: 0 0 8px var(--rheon); }
-.char-token.active { border-color: var(--gold); box-shadow: 0 0 12px var(--gold); animation: pulse 1.5s infinite; }
-.char-token.dead { background: var(--dead); box-shadow: none; border-color: #444; }
+.char-token.active {
+    outline: 2px solid var(--gold);
+    filter: brightness(1.15) drop-shadow(0 0 4px rgba(240,165,0,0.8));
+    animation: pulse 1.5s infinite;
+}
+.char-token.dead {
+    opacity: 0.35;
+    filter: grayscale(1) brightness(0.5);
+}
 
 @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 8px var(--gold); }
-    50% { box-shadow: 0 0 18px var(--gold); }
+    0%, 100% { filter: brightness(1.1) drop-shadow(0 0 3px rgba(240,165,0,0.6)); }
+    50% { filter: brightness(1.3) drop-shadow(0 0 8px rgba(240,165,0,1)); }
 }
 
 #map-legend {
@@ -585,21 +589,18 @@ section {
 
 /* ===== NPC tokens ===== */
 .npc-token {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--gold);
-    color: #000;
-    font-size: 10px;
-    font-weight: bold;
+    width: 38px;
+    height: 38px;
+    image-rendering: pixelated;
+    display: block;
     cursor: pointer;
-    border: 2px solid #fff8;
-    transition: transform 0.1s;
+    position: relative;
+    z-index: 1;
+    transition: filter 0.1s, transform 0.1s;
+    outline: 2px solid rgba(240,165,0,0.6);
 }
-.npc-token:hover { transform: scale(1.15); border-color: #fff; }
-.npc-token.dead { opacity: 0.4; cursor: default; }
+.npc-token:hover { transform: scale(1.08); filter: brightness(1.2); outline-color: var(--gold); }
+.npc-token.dead { opacity: 0.35; cursor: default; filter: grayscale(1) brightness(0.5); }
 
 /* ===== Objective markers ===== */
 .objective-marker {
@@ -617,14 +618,9 @@ section {
 
 /* ===== Locked zone cells ===== */
 .map-cell.locked-zone {
-    background: repeating-linear-gradient(
-        45deg,
-        #2a1a0a,
-        #2a1a0a 4px,
-        #1a0a00 4px,
-        #1a0a00 8px
-    );
-    border-color: #8b4513;
+    background-image: url('sprites/wall.png') !important;
+    background-size: 100% 100% !important;
+    filter: brightness(0.45) sepia(0.4);
 }
 
 /* ===== Map legend additions ===== */

@@ -6,6 +6,19 @@ let state = null
 let pendingAction = null
 let eventSource = null
 
+// ===== Sprite mapping =====
+const PLAYER_SPRITES = ['tile_0084', 'tile_0085', 'tile_0086', 'tile_0087', 'tile_0088']
+const NPC_SPRITES    = ['tile_0109', 'tile_0089']
+
+function getSpriteSrc(p, allPlayers) {
+    if (p.isNpc) {
+        const idx = allPlayers.filter(x => x.isNpc).indexOf(p)
+        return `sprites/${NPC_SPRITES[idx % NPC_SPRITES.length]}.png`
+    }
+    const idx = allPlayers.filter(x => !x.isNpc).indexOf(p)
+    return `sprites/${PLAYER_SPRITES[idx % PLAYER_SPRITES.length]}.png`
+}
+
 // ===== API =====
 async function apiPost(path, body = {}) {
     const r = await fetch(`${API}${path}`, {
@@ -179,7 +192,8 @@ function renderHeader() {
 function renderMap() {
     const grid = document.getElementById('map-grid')
     grid.innerHTML = ''
-    const { width, height, walls, lockedZoneCells = [] } = state.map
+    const { width, height, walls, lockedZoneCells = [], terrain = 'sand' } = state.map
+    grid.dataset.terrain = terrain
     const lockedSet = new Set(lockedZoneCells.map(([x, y]) => `${x},${y}`))
     const markerMap = new Map()
     for (const m of (state.quest?.objectiveMarkers || [])) {
@@ -212,7 +226,10 @@ function renderMap() {
 
             const charsHere = state.players.filter(p => p.cell[0] === col && p.cell[1] === row)
             charsHere.forEach(p => {
-                const token = document.createElement('div')
+                const token = document.createElement('img')
+                token.src = getSpriteSrc(p, state.players)
+                token.alt = p.label
+                token.draggable = false
                 const isActive = p.key === state.activePlayerKey
                 const isMe = p.key === myPlayerKey
                 if (p.isNpc) {
@@ -227,7 +244,6 @@ function renderMap() {
                     token.className = `char-token ${p.key}${isActive ? ' active' : ''}${!p.alive ? ' dead' : ''}${isMe ? ' mine' : ''}`
                     token.title = `${p.label} — HP: ${p.hp}, Mana: ${p.mana}`
                 }
-                token.textContent = p.label.substring(0, 2).toUpperCase()
                 cell.appendChild(token)
             })
 

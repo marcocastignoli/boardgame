@@ -313,74 +313,78 @@ section {
     grid-template-columns: repeat(10, 40px);
     grid-template-rows: repeat(10, 40px);
     gap: 1px;
-    background: var(--border);
+    background: #1a0d05;
     border: 1px solid var(--border2);
     width: fit-content;
+    image-rendering: pixelated;
 }
 
 .map-cell {
     width: 40px;
     height: 40px;
-    background: var(--bg3);
+    background-image: url('sprites/floor.png');
+    background-size: 100% 100%;
+    image-rendering: pixelated;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    transition: filter 0.1s;
 }
+.map-cell:hover { filter: brightness(1.12); }
 .map-cell.wall {
-    background: #0d0d12;
-    background-image:
-        repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(30,28,40,0.6) 4px, rgba(30,28,40,0.6) 5px);
+    background-image: url('sprites/wall.png');
+    background-size: 100% 100%;
+}
+
+/* ===== Terrain variants ===== */
+#map-grid[data-terrain="grass"] .map-cell:not(.wall):not(.locked-zone) {
+    background-image: url('sprites/grass.png');
+}
+#map-grid[data-terrain="snow"] .map-cell:not(.wall):not(.locked-zone) {
+    background-image: url('sprites/snow.png');
 }
 .map-cell .coord {
     position: absolute;
-    top: 2px;
-    left: 3px;
-    font-size: 8px;
-    color: var(--text3);
+    bottom: 1px;
+    right: 2px;
+    font-size: 7px;
+    color: rgba(0,0,0,0.4);
     font-family: monospace;
     pointer-events: none;
     line-height: 1;
 }
 
 .char-token {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: bold;
-    color: #fff;
-    border: 1.5px solid rgba(255,255,255,0.25);
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+    display: block;
     position: relative;
     z-index: 1;
     cursor: default;
-    transition: box-shadow 0.2s;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    transition: filter 0.2s, outline 0.2s;
 }
 .char-token.active {
-    border-color: var(--gold);
-    box-shadow: 0 0 8px var(--gold-glow), 0 0 16px var(--gold-glow);
+    outline: 2px solid var(--gold);
+    filter: brightness(1.15) drop-shadow(0 0 4px rgba(200,168,75,0.9));
     animation: token-pulse 2s ease-in-out infinite;
 }
 .char-token.mine {
-    border-color: #fff;
-    border-width: 2px;
+    outline: 2px solid rgba(255,255,255,0.7);
 }
 .char-token.mine.active {
-    border-color: var(--gold);
-    box-shadow: 0 0 12px var(--gold), 0 0 24px var(--gold-glow);
+    outline: 2px solid var(--gold);
+    filter: brightness(1.2) drop-shadow(0 0 6px rgba(200,168,75,1));
 }
 .char-token.dead {
     opacity: 0.3;
-    filter: grayscale(1);
+    filter: grayscale(1) brightness(0.5);
 }
 @keyframes token-pulse {
-    0%, 100% { box-shadow: 0 0 6px var(--gold-glow); }
-    50% { box-shadow: 0 0 14px var(--gold), 0 0 24px var(--gold-glow); }
+    0%, 100% { filter: brightness(1.1) drop-shadow(0 0 3px rgba(200,168,75,0.6)); }
+    50% { filter: brightness(1.3) drop-shadow(0 0 8px rgba(200,168,75,1)); }
 }
 
 /* ===== CONTROLS ===== */
@@ -734,21 +738,18 @@ select:focus { border-color: var(--gold-dim); }
 
 /* ===== NPC tokens ===== */
 .npc-token {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--gold, #c9a227);
-    color: #000;
-    font-size: 10px;
-    font-weight: bold;
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+    display: block;
     cursor: pointer;
-    border: 2px solid rgba(255,255,255,0.5);
-    transition: transform 0.1s;
+    position: relative;
+    z-index: 1;
+    transition: filter 0.1s, transform 0.1s;
+    outline: 2px solid rgba(200,168,75,0.55);
 }
-.npc-token:hover { transform: scale(1.15); border-color: #fff; }
-.npc-token.dead { opacity: 0.4; cursor: default; }
+.npc-token:hover { transform: scale(1.1); filter: brightness(1.2); outline-color: var(--gold); }
+.npc-token.dead { opacity: 0.35; cursor: default; filter: grayscale(1) brightness(0.5); }
 
 /* ===== Objective markers ===== */
 .objective-marker {
@@ -766,14 +767,9 @@ select:focus { border-color: var(--gold-dim); }
 
 /* ===== Locked zone cells ===== */
 .map-cell.locked-zone {
-    background: repeating-linear-gradient(
-        45deg,
-        #2a1a0a,
-        #2a1a0a 4px,
-        #1a0a00 4px,
-        #1a0a00 8px
-    ) !important;
-    border-color: #8b4513;
+    background-image: url('sprites/wall.png') !important;
+    background-size: 100% 100% !important;
+    filter: brightness(0.45) sepia(0.4);
 }
 
 /* ===== Quest Panel ===== */

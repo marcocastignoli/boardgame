@@ -41,6 +41,8 @@ class Quest {
         }
 
         this.activeDialog = null // { npcKey, dialogKey, nodeId }
+        this.terrain = def.terrain || 'sand' // 'sand' | 'grass' | 'snow'
+        this.innerRows = new Set(def.innerRows || []) // rows that use floor tile instead of terrain
     }
 
     getDialogNode(dialogKey, nodeId) {
@@ -176,7 +178,8 @@ class Quest {
                 nodeId: this.activeDialog.nodeId,
                 node: this.getDialogNode(this.activeDialog.dialogKey, this.activeDialog.nodeId)
             } : null,
-            npcKeys: Object.keys(this.npcDialogs)
+            npcKeys: Object.keys(this.npcDialogs),
+            terrain: this.terrain
         }
     }
 
